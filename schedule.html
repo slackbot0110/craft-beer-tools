@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>30天内容排期表 - 精酿工具箱</title>
+<meta name="description" content="精酿啤酒小红书30天内容排期表：22天发布+8天休息，四周递进策略，包含具体选题、标题参考、标签建议和发布时间。">
+<meta property="og:title" content="30天内容排期表 - 精酿工具箱">
+<meta property="og:description" content="精酿啤酒小红书30天内容日历，按7:2:1内容矩阵规划，从建立节奏到放大爆款。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .header h1 span { color: #e2b04a; }
+  .header p {
+    font-size: 14px;
+    opacity: 0.7;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 20px;
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    min-width: 120px;
+  }
+  .stat-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: #e2b04a;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+  }
+
+  /* Strategy Section */
+  .strategy {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+  .strategy-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .strategy-card h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ratio-bar {
+    display: flex;
+    height: 32px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .ratio-bar div { display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; }
+  .ratio-life { width: 70%; background: linear-gradient(90deg, #e2b04a, #f0c95a); }
+  .ratio-trend { width: 20%; background: linear-gradient(90deg, #ff6b6b, #ff8e8e); }
+  .ratio-product { width: 10%; background: linear-gradient(90deg, #4ecdc4, #6ee7de); }
+
+  /* Week Section */
+  .week-section {
+    max-width: 900px;
+    margin: 24px auto;
+    padding: 0 20px;
+  }
+  .week-header {
+    background: white;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .week-header h2 {
+    font-size: 18px;
+  }
+  .week-header .week-theme {
+    font-size: 13px;
+    color: #e2b04a;
+    background: #fdf6e3;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  /* Day Card */
+  .day-card {
+    background: white;
+    border-left: 4px solid transparent;
+    padding: 20px 28px;
+    border-bottom: 1px solid #f0ebe5;
+    transition: all 0.2s;
+  }
+  .day-card:hover {
+    background: #fdfcfa;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    transform: translateX(4px);
+  }
+  .day-card.life { border-left-color: #e2b04a; }
+  .day-card.trend { border-left-color: #ff6b6b; }
+  .day-card.product { border-left-color: #4ecdc4; }
+  .day-card.rest { border-left-color: #ddd; opacity: 0.6; }
+
+  .day-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .day-date {
+    font-size: 13px;
+    color: #999;
+    font-weight: 500;
+  }
+  .day-type {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  .type-life { background: #fdf6e3; color: #c49520; }
+  .type-trend { background: #fff0f0; color: #e05050; }
+  .type-product { background: #e8faf8; color: #2aaa9e; }
+  .type-rest { background: #f5f5f5; color: #999; }
+
+  .day-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1a1a2e;
+  }
+  .day-content {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 12px;
+    line-height: 1.7;
+  }
+  .day-content ul {
+    padding-left: 18px;
+    margin-top: 6px;
+  }
+  .day-content li { margin-bottom: 3px; }
+  .day-time {
+    font-size: 12px;
+    color: #b08030;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .day-tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #f5f0eb;
+    color: #888;
+  }
+
+  .week-section .day-card:last-child {
+    border-radius: 0 0 16px 16px;
+    border-bottom: none;
+  }
+
+  /* Tips Section */
+  .tips-section {
+    max-width: 900px;
+    margin: 24px auto 60px;
+    padding: 0 20px;
+  }
+  .tips-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .tips-card h2 { font-size: 18px; margin-bottom: 16px; }
+  .tip-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .tip-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tip-icon.t1 { background: #fdf6e3; }
+  .tip-icon.t2 { background: #fff0f0; }
+  .tip-icon.t3 { background: #e8faf8; }
+  .tip-icon.t4 { background: #f0e8ff; }
+  .tip-text h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .tip-text p { font-size: 13px; color: #777; line-height: 1.6; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .header h1 { font-size: 22px; }
+    .stats-bar { gap: 12px; }
+    .stat-item { padding: 12px 16px; min-width: 90px; }
+    .stat-num { font-size: 22px; }
+    .day-card { padding: 16px 20px; }
+    .day-title { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" style="display:inline-block;margin-bottom:8px;font-size:13px;color:rgba(255,255,255,0.6);text-decoration:none;">← 返回工具箱首页</a>
+  <h1>🍺 <span>精酿啤酒</span>小红书 30天内容排期表</h1>
+  <p>基于「偷懒机器」账号定位定制｜闽南人 × 精酿测评 × 口粮酒发掘</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">22</div>
+    <div class="stat-label">发布天数</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">4</div>
+    <div class="stat-label">合集/系列</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">3</div>
+    <div class="stat-label">趋势蹭热点</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">8</div>
+    <div class="stat-label">休息日</div>
+  </div>
+</div>
+
+<!-- Content Strategy -->
+<div class="strategy">
+  <div class="strategy-card">
+    <h2>📊 内容比例策略 7:2:1</h2>
+    <div class="ratio-bar">
+      <div class="ratio-life">🍺 生活方式 70%</div>
+      <div class="ratio-trend">📈 趋势热点 20%</div>
+      <div class="ratio-product">🛒 直接种草 10%</div>
+    </div>
+    <ul style="font-size:13px;color:#666;padding-left:18px;margin-top:8px;">
+      <li><b>生活方式</b>：单酒测评（带场景和故事）、啤酒+美食搭配、精酿吧探店、在家喝酒日常</li>
+      <li><b>趋势热点</b>：热门品牌新品、季节限定、行业话题、争议讨论</li>
+      <li><b>直接种草</b>：合集推荐、性价比排行、入门指南</li>
+    </ul>
+  </div>
+</div>
+
+<!-- WEEK 1 -->
+<div class="week-section">
+  <div class="week-header">
+    <h2>📅 第一周｜建立内容节奏</h2>
+    <span class="week-theme">🎯 目标：测试新模板，找到最优发布时间</span>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 1 · 周三 · 4/1</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">浑浊IPA推荐｜20块的国产双倍IPA，真的能打</div>
+    <div class="day-content">
+      <b>内容类型</b>：单酒测评（用优化后模板重写沙坡尾角头2.0）
+      <ul>
+        <li>开头钩子：价格锚定「20块的双倍IPA」</li>
+        <li>感官描述 + 大白话翻译</li>
+        <li>闽南人身份标签自然融入</li>
+        <li>结尾CTA：引导评论区讨论</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿啤酒</span><span class="tag">#精酿推荐</span><span class="tag">#IPA</span><span class="tag">#浑浊IPA</span><span class="tag">#国产精酿</span><span class="tag">#精酿测评</span><span class="tag">#口粮酒推荐</span><span class="tag">#微醺日常</span>
+    </div>
+  </div>
+
+  <div class="day-card product">
+    <div class="day-top">
+      <span class="day-date">Day 2 · 周四 · 4/2</span>
+      <span class="day-type type-product">🛒 直接种草</span>
+    </div>
+    <div class="day-title">精酿新手入门｜5款便利店就能买到的口粮酒</div>
+    <div class="day-content">
+      <b>内容类型</b>：合集推荐（天然高收藏高分享）
+      <ul>
+        <li>覆盖便利店常见品牌（如拳击猫、牛啤堂、大跃等）</li>
+        <li>每款标注：风格、ABV、价格、一句话评价</li>
+        <li>按「果味入门→经典品味→重口味挑战」排序</li>
+        <li>封面：5款酒并排 + 大字「闭眼入」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:00</span>
+    <div class="day-tags">
+      <span class="tag">#精酿推荐</span><span class="tag">#精酿入门</span><span class="tag">#口粮酒</span><span class="tag">#便利店好物</span><span class="tag">#精酿啤酒</span><span class="tag">#啤酒推荐</span><span class="tag">#入门指南</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 3 · 周五 · 4/3</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">不发布，专注评论区互动。去搜索「精酿啤酒」找热门笔记留有价值的评论，引流回自己的主页。</div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 4 · 周六 · 4/4</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">周末微醺计划｜精酿+烧烤，这才是夏天的正确打开方式</div>
+    <div class="day-content">
+      <b>内容类型</b>：生活场景（啤酒+美食搭配）
+      <ul>
+        <li>场景化拍摄：户外/阳台/烧烤摊 + 冰啤酒</li>
+        <li>推荐3款适合配烧烤的精酿（如德式小麦、皮尔森、淡色艾尔）</li>
+        <li>氛围感拉满，弱化测评感，强化生活方式感</li>
+        <li>封面：手持啤酒碰杯 + 烧烤背景</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 11:30（周末中午流量好）</span>
+    <div class="day-tags">
+      <span class="tag">#周末微醺</span><span class="tag">#精酿啤酒</span><span class="tag">#烧烤配酒</span><span class="tag">#微醺日常</span><span class="tag">#夏日啤酒</span><span class="tag">#精酿搭配</span>
+    </div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 5 · 周日 · 4/5</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">沙坡尾精酿酒单完整测评｜角头、大牌、打狗三兄弟来了</div>
+    <div class="day-content">
+      <b>内容类型</b>：品牌系列测评（利用闽南身份差异化）
+      <ul>
+        <li>三款酒横向对比：风格、口感、性价比</li>
+        <li>融入闽南文化解读（角头=地盘、打狗=高雄旧称等）</li>
+        <li>给出排名推荐，引发评论区站队讨论</li>
+        <li>封面：三款酒并排 + 「闽南人测评闽南酒」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 12:00</span>
+    <div class="day-tags">
+      <span class="tag">#沙坡尾精酿</span><span class="tag">#精酿测评</span><span class="tag">#国产精酿</span><span class="tag">#精酿推荐</span><span class="tag">#闽南</span><span class="tag">#精酿啤酒</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 6 · 周一 · 4/6</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">复盘第一周数据：哪篇阅读最高？哪篇收藏最多？分析原因并调整下周策略。</div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 7 · 周二 · 4/7</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">下班后的独处时光｜一杯世涛配一部老电影</div>
+    <div class="day-content">
+      <b>内容类型</b>：情绪共鸣型（强化人设）
+      <ul>
+        <li>推荐一款世涛/波特 + 一部电影/音乐搭配</li>
+        <li>弱化参数，强化「氛围感」和「情绪价值」</li>
+        <li>文案风格走心：「工作累了，就给自己倒一杯」</li>
+        <li>这类内容容易引发共鸣和转发</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 21:00（夜间情绪共鸣时段）</span>
+    <div class="day-tags">
+      <span class="tag">#微醺日常</span><span class="tag">#精酿啤酒</span><span class="tag">#下班日常</span><span class="tag">#独处</span><span class="tag">#世涛</span><span class="tag">#精酿生活</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 2 -->
+<div class="week-section">
+  <div class="week-header">
+    <h2>📅 第二周｜测试内容类型，找到爆款模式</h2>
+    <span class="week-theme">🔥 目标：至少1篇突破500阅读</span>
+  </div>
+
+  <div class="day-card trend">
+    <div class="day-top">
+      <span class="day-date">Day 8 · 周三 · 4/8</span>
+      <span class="day-type type-trend">📈 趋势热点</span>
+    </div>
+    <div class="day-title">精酿圈最近都在喝什么？3月热门酒款盘点</div>
+    <div class="day-content">
+      <b>内容类型</b>：趋势盘点（蹭行业热点）
+      <ul>
+        <li>盘点近期精酿圈热门酒款/品牌/新闻</li>
+        <li>加入个人观点：「到底值不值这个价？」</li>
+        <li>引发讨论：「你们最近在喝什么？」</li>
+        <li>封面用大字：「精酿圈3月热门榜」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿啤酒</span><span class="tag">#精酿推荐</span><span class="tag">#精酿热门</span><span class="tag">#啤酒测评</span><span class="tag">#精酿圈</span>
+    </div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 9 · 周四 · 4/9</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">国产精酿 vs 进口精酿｜同价位盲测，结果出乎意料</div>
+    <div class="day-content">
+      <b>内容类型</b>：对比测评（争议性话题，高讨论量）
+      <ul>
+        <li>选同价位的国产vs进口（如50元档IPA对比）</li>
+        <li>盲测或直接对比：外观、闻香、口感、性价比</li>
+        <li>给出个人判断，不怕有争议（争议=流量）</li>
+        <li>封面：「国产vs进口，谁更值？」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:00</span>
+    <div class="day-tags">
+      <span class="tag">#精酿啤酒</span><span class="tag">#国产精酿</span><span class="tag">#精酿测评</span><span class="tag">#啤酒对比</span><span class="tag">#精酿推荐</span><span class="tag">#性价比</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 10 · 周五 · 4/10</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">互动日：回复所有待回复评论，去相关话题下留言引流。</div>
+  </div>
+
+  <div class="day-card product">
+    <div class="day-top">
+      <span class="day-date">Day 11 · 周六 · 4/11</span>
+      <span class="day-type type-product">🛒 直接种草</span>
+    </div>
+    <div class="day-title">百元以内精酿推荐｜7款不踩雷的好酒清单</div>
+    <div class="day-content">
+      <b>内容类型</b>：合集种草（收藏型内容）
+      <ul>
+        <li>按价格从低到高排列，标注购买渠道</li>
+        <li>每款一句话核心卖点 + 适合人群</li>
+        <li>结尾：「你们有什么百元内私藏酒款？」</li>
+        <li>封面：7款酒矩阵排列 + 大字「百元内必喝」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 11:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿推荐</span><span class="tag">#精酿啤酒</span><span class="tag">#百元好物</span><span class="tag">#口粮酒推荐</span><span class="tag">#精酿入门</span><span class="tag">#性价比之选</span>
+    </div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 12 · 周日 · 4/12</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">在家也能调出精酿吧的感觉｜我的居家酒具和摆拍技巧</div>
+    <div class="day-content">
+      <b>内容类型</b>：生活方式分享（涨粉型内容）
+      <ul>
+        <li>分享酒杯选择、倒酒技巧、拍照角度</li>
+        <li>这类内容受众远超精酿圈，能带来泛流量</li>
+        <li>封面：精美酒具特写 + 大字「在家喝精酿仪式感」</li>
+        <li>结尾：「你们用什么杯子喝精酿？」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 12:00</span>
+    <div class="day-tags">
+      <span class="tag">#精酿啤酒</span><span class="tag">#居家微醺</span><span class="tag">#酒具推荐</span><span class="tag">#拍照技巧</span><span class="tag">#精酿生活</span><span class="tag">#仪式感</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 13 · 周一 · 4/13</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">复盘第二周数据，记录哪篇表现最好，分析爆款因素。</div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 14 · 周二 · 4/14</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">酸啤入坑指南｜从不敢喝到一口上头</div>
+    <div class="day-content">
+      <b>内容类型</b>：入门科普 + 测评
+      <ul>
+        <li>以个人经历切入：「第一次喝酸啤差点吐了」</li>
+        <li>推荐3款入门级酸啤（果酸、兰比克、柏林酸小麦）</li>
+        <li>建立「成长线」人设：从小白到进阶</li>
+        <li>封面：「酸啤真香定律」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#酸啤</span><span class="tag">#精酿入门</span><span class="tag">#精酿啤酒</span><span class="tag">#精酿推荐</span><span class="tag">#兰比克</span><span class="tag">#果啤</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 3 -->
+<div class="week-section">
+  <div class="week-header">
+    <h2>📅 第三周｜复制成功模式，强化人设标签</h2>
+    <span class="week-theme">⚡ 目标：持续稳定输出，建立粉丝期待</span>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 15 · 周三 · 4/15</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">精酿吧探店 vol.1｜藏在巷子里的宝藏酒吧</div>
+    <div class="day-content">
+      <b>内容类型</b>：探店Vlog/图文
+      <ul>
+        <li>探店当地精酿吧（优先选有故事的小店）</li>
+        <li>拍环境、酒单、点单推荐（3款必点）</li>
+        <li>标注地址、人均消费、推荐时段</li>
+        <li>封面：酒吧氛围图 + 「这家精酿吧值得专程去」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿吧</span><span class="tag">#探店</span><span class="tag">#精酿啤酒</span><span class="tag">#宝藏酒吧</span><span class="tag">#微醺日常</span><span class="tag">#城市探索</span>
+    </div>
+  </div>
+
+  <div class="day-card trend">
+    <div class="day-top">
+      <span class="day-date">Day 16 · 周四 · 4/16</span>
+      <span class="day-type type-trend">📈 趋势热点</span>
+    </div>
+    <div class="day-title">精酿啤酒智商税？这些高价酒到底贵在哪</div>
+    <div class="day-content">
+      <b>内容类型</b>：争议话题（高讨论高分享）
+      <ul>
+        <li>拆解精酿成本：酒花、工艺、桶陈、限量</li>
+        <li>给出判断框架：「什么时候值得花钱」</li>
+        <li>不怕争议——争议型内容更容易破圈</li>
+        <li>封面：「一瓶精酿卖200块，合理吗？」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:00</span>
+    <div class="day-tags">
+      <span class="tag">#精酿啤酒</span><span class="tag">#智商税</span><span class="tag">#精酿科普</span><span class="tag">#啤酒价格</span><span class="tag">#精酿推荐</span><span class="tag">#讨论</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 17 · 周五 · 4/17</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">互动日 + 准备周末内容素材。</div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 18 · 周六 · 4/18</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">精酿配餐指南｜5款酒配5道菜，在家办一场啤酒晚宴</div>
+    <div class="day-content">
+      <b>内容类型</b>：搭配指南（实用+美观，高收藏）
+      <ul>
+        <li>如：IPA配泰式咖喱、世涛配巧克力甜点、小麦配沙拉等</li>
+        <li>场景化拍摄：餐桌摆拍、食物+酒杯特写</li>
+        <li>封面：「精酿配餐天花板」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 11:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿搭配</span><span class="tag">#啤酒配餐</span><span class="tag">#精酿啤酒</span><span class="tag">#居家美食</span><span class="tag">#微醺日常</span><span class="tag">#美食推荐</span>
+    </div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 19 · 周日 · 4/19</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">一箱酒的钱，我喝了30种不同风格｜精酿试饮套装测评</div>
+    <div class="day-content">
+      <b>内容类型</b>：开箱测评（好奇心驱动）
+      <ul>
+        <li>买一套品牌试饮套装（如BrewDog、高大师等）</li>
+        <li>逐个简评，最终排名</li>
+        <li>给新手提供「一次尝遍主流风格」的方案</li>
+        <li>封面：整箱酒 + 大字「一箱喝遍精酿」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 12:00</span>
+    <div class="day-tags">
+      <span class="tag">#精酿啤酒</span><span class="tag">#精酿测评</span><span class="tag">#试饮套装</span><span class="tag">#精酿入门</span><span class="tag">#开箱</span><span class="tag">#精酿推荐</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 20 · 周一 · 4/20</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">第三周复盘。重点看哪类内容收藏率最高，集中精力复制。</div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 21 · 周二 · 4/21</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">精酿啤酒保存指南｜别再把你贵贵的酒放冰箱了</div>
+    <div class="day-content">
+      <b>内容类型</b>：科普干货（高收藏高分享）
+      <ul>
+        <li>避光、温度、保质期、倒酒方式</li>
+        <li>纠正常见误区（如「啤酒一定要冰着喝」）</li>
+        <li>封面：「你一直在错的啤酒保存方式」</li>
+        <li>干货类内容长尾流量很好，几个月后还在涨</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿科普</span><span class="tag">#精酿啤酒</span><span class="tag">#啤酒保存</span><span class="tag">#精酿入门</span><span class="tag">#冷知识</span>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK 4 -->
+<div class="week-section">
+  <div class="week-header">
+    <h2>📅 第四周｜放大爆款，建立系列IP</h2>
+    <span class="week-theme">🚀 目标：沉淀系列栏目，培养粉丝追更习惯</span>
+  </div>
+
+  <div class="day-card trend">
+    <div class="day-top">
+      <span class="day-date">Day 22 · 周三 · 4/22</span>
+      <span class="day-type type-trend">📈 趋势热点</span>
+    </div>
+    <div class="day-title">2026精酿趋势｜哪些风格今年最火？</div>
+    <div class="day-content">
+      <b>内容类型</b>：行业趋势（权威感+话题性）
+      <ul>
+        <li>盘点当年流行风格（如酸浑浊IPA、茶啤、果蔬啤酒等）</li>
+        <li>结合国内市场分析：「国产精酿正在卷什么」</li>
+        <li>封面：「2026精酿趋势报告」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿趋势</span><span class="tag">#精酿啤酒</span><span class="tag">#精酿推荐</span><span class="tag">#啤酒测评</span><span class="tag">#国产精酿</span>
+    </div>
+  </div>
+
+  <div class="day-card product">
+    <div class="day-top">
+      <span class="day-date">Day 23 · 周四 · 4/23</span>
+      <span class="day-type type-product">🛒 直接种草</span>
+    </div>
+    <div class="day-title">送男生礼物指南｜10款有品位的精酿礼盒推荐</div>
+    <div class="day-content">
+      <b>内容类型</b>：场景种草（跳出精酿圈，触达泛人群）
+      <ul>
+        <li>按预算分档：50元/100元/200元/500元+</li>
+        <li>适合生日、纪念日、节日送礼场景</li>
+        <li>这类内容搜索量巨大（「送男生礼物」「男朋友生日」）</li>
+        <li>封面：「送男生礼物看这篇就够了」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:00</span>
+    <div class="day-tags">
+      <span class="tag">#送男生礼物</span><span class="tag">#男朋友生日</span><span class="tag">#精酿礼盒</span><span class="tag">#精酿啤酒</span><span class="tag">#礼物推荐</span><span class="tag">#有品位</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 24 · 周五 · 4/24</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">互动日。本周是高产周，保存体力。</div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 25 · 周六 · 4/25</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">精酿吧探店 vol.2｜另一家风格完全不同的宝藏小店</div>
+    <div class="day-content">
+      <b>内容类型</b>：系列化内容（培养追更习惯）
+      <ul>
+        <li>探店系列第二期，建立「探店IP」</li>
+        <li>和vol.1形成对比：风格、价位、氛围不同</li>
+        <li>封面统一格式：「探店vol.2」+ 店名</li>
+        <li>在结尾预告vol.3，引导关注</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 11:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿吧探店</span><span class="tag">#精酿探店</span><span class="tag">#精酿啤酒</span><span class="tag">#宝藏酒吧</span><span class="tag">#微醺日常</span>
+    </div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 26 · 周日 · 4/26</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">精酿测评｜[具体酒款名]，XX元这个水平可以吗？</div>
+    <div class="day-content">
+      <b>内容类型</b>：单酒测评（回归核心内容）
+      <ul>
+        <li>用优化后的测评模板，测评一款新酒</li>
+        <li>标题统一格式：「精酿测评｜酒款名，XX元能喝出什么？」</li>
+        <li>逐步建立品牌感：固定的排版、打分、标签</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 12:00</span>
+    <div class="day-tags">
+      <span class="tag">#精酿测评</span><span class="tag">#精酿啤酒</span><span class="tag">#精酿推荐</span><span class="tag">#口粮酒</span><span class="tag">#微醺日常</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 27 · 周一 · 4/27</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">月末复盘日：统计30天总数据，分析增长曲线，规划下月策略。</div>
+  </div>
+
+  <div class="day-card product">
+    <div class="day-top">
+      <span class="day-date">Day 28 · 周二 · 4/28</span>
+      <span class="day-type type-product">🛒 直接种草</span>
+    </div>
+    <div class="day-title">30天精酿测评合集｜我喝过的15款酒，只推荐这8款</div>
+    <div class="day-content">
+      <b>内容类型</b>：月度合集（超级收藏型内容）
+      <ul>
+        <li>汇总本月测评过的所有酒款，精选推荐</li>
+        <li>分类整理：最值得回购 / 性价比最高 / 最适合送人</li>
+        <li>封面：「30天测评合集」+ 数字冲击</li>
+        <li>预告下月：「下个月会测评XX系列，关注不迷路」</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:30</span>
+    <div class="day-tags">
+      <span class="tag">#精酿推荐</span><span class="tag">#精酿测评合集</span><span class="tag">#精酿啤酒</span><span class="tag">#口粮酒推荐</span><span class="tag">#精酿入门</span><span class="tag">#回购清单</span>
+    </div>
+  </div>
+
+  <div class="day-card life">
+    <div class="day-top">
+      <span class="day-date">Day 29 · 周三 · 4/29</span>
+      <span class="day-type type-life">🍺 生活方式</span>
+    </div>
+    <div class="day-title">五一假期精酿攻略｜出行必带的5款罐装精酿</div>
+    <div class="day-content">
+      <b>内容类型</b>：节日场景（蹭五一热点）
+      <ul>
+        <li>推荐便携罐装精酿，适合露营/野餐/自驾</li>
+        <li>场景化拍摄：户外 + 冰啤酒</li>
+        <li>封面：「五一出游带上这些精酿」</li>
+        <li>节假日内容流量加成明显</li>
+      </ul>
+    </div>
+    <span class="day-time">⏰ 建议发布 18:00</span>
+    <div class="day-tags">
+      <span class="tag">#五一出游</span><span class="tag">#精酿啤酒</span><span class="tag">#露营必备</span><span class="tag">#精酿推荐</span><span class="tag">#旅行</span><span class="tag">#微醺日常</span>
+    </div>
+  </div>
+
+  <div class="day-card rest">
+    <div class="day-top">
+      <span class="day-date">Day 30 · 周四 · 4/30</span>
+      <span class="day-type type-rest">😌 休息日</span>
+    </div>
+    <div class="day-content">
+      🎉 30天内容计划完成！进行全面复盘，规划5月内容方向。<br>
+      <b>复盘重点</b>：哪类内容数据最好？哪个发布时间效果最佳？粉丝增长了多少？据此调整下月策略。
+    </div>
+  </div>
+</div>
+
+<!-- Tips -->
+<div class="tips-section">
+  <div class="tips-card">
+    <h2>💡 执行Tips</h2>
+    <div class="tip-item">
+      <div class="tip-icon t1">📸</div>
+      <div class="tip-text">
+        <h3>封面统一视觉</h3>
+        <p>所有测评类笔记用统一的排版模板（酒名+价格+一句话评价），建立品牌辨识度。合集类用多酒排列。探店类用场景大图。</p>
+      </div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon t2">📝</div>
+      <div class="tip-text">
+        <h3>文案模板复用</h3>
+        <p>单酒测评统一用「钩子开头→参数卡→观感→闻香→口感→人话翻译→适合人群→价格→CTA」的结构，减少创作成本。</p>
+      </div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon t3">⏰</div>
+      <div class="tip-text">
+        <h3>发布后2小时黄金期</h3>
+        <p>发完后立刻回复每条评论，同时去「精酿啤酒」话题下找热门笔记留有价值的评论，主动曝光。</p>
+      </div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon t4">📊</div>
+      <div class="tip-text">
+        <h3>每周复盘</h3>
+        <p>每周一记录数据：阅读量、收藏率、评论数。找出数据最好的那篇，分析为什么——然后复制成功模式。</p>
+      </div>
+    </div>
+    <div class="tip-item">
+      <div class="tip-icon t1">🎯</div>
+      <div class="tip-text">
+        <h3>灵活调整</h3>
+        <p>这份排期表是方向指引，不是死板执行。如果某天看到热点话题，果断调整内容蹭流量。灵活＞完美。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>精酿工具箱 - 偷懒机器</title>
+<meta name="description" content="精酿啤酒博主效率工具箱：一键生成小红书爆款文案、30天内容排期表。帮你从100阅读量突破到1000+。">
+<meta property="og:title" content="精酿工具箱 - 偷懒机器">
+<meta property="og:description" content="精酿啤酒博主效率工具箱：一键生成小红书爆款文案、30天内容排期表。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="精酿工具箱 - 偷懒机器">
+<meta name="twitter:description" content="精酿啤酒博主效率工具箱：一键生成小红书爆款文案、30天内容排期表。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f5f0eb;
+    color: #2c2c2c;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 48px 20px 40px;
+    text-align: center;
+  }
+  .header-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+  .header h1 span { color: #e2b04a; }
+  .header p {
+    font-size: 14px;
+    opacity: 0.7;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .header .author {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 16px;
+    background: rgba(226, 176, 74, 0.15);
+    border: 1px solid rgba(226, 176, 74, 0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    color: #e2b04a;
+  }
+
+  /* Main */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 16px 60px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 16px;
+    padding-left: 4px;
+    letter-spacing: 1px;
+  }
+
+  /* Tool Cards */
+  .tool-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .tool-card.gold::before { background: #e2b04a; }
+  .tool-card.teal::before { background: #4ecdc4; }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  .gold .card-icon { background: #fdf6e3; }
+  .teal .card-icon { background: #e8faf8; }
+
+  .card-info h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .card-info .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .gold .badge { background: #fdf6e3; color: #c49520; }
+  .teal .badge { background: #e8faf8; color: #2ba89d; }
+
+  .card-desc {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+
+  .card-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .feature-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: #f5f5f5;
+    color: #888;
+  }
+
+  .card-arrow {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #ccc;
+    transition: all 0.2s;
+  }
+  .tool-card:hover .card-arrow {
+    right: 20px;
+    color: #999;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: #aaa;
+  }
+  .footer a {
+    color: #e2b04a;
+    text-decoration: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .header { padding: 36px 16px 32px; }
+    .header h1 { font-size: 22px; }
+    .card-top { gap: 12px; }
+    .card-icon { width: 48px; height: 48px; font-size: 24px; }
+    .card-info h2 { font-size: 16px; }
+    .card-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🍺</div>
+  <h1><span>精酿</span>工具箱</h1>
+  <p>精酿啤酒博主的效率武器库，从选题到发布一站搞定</p>
+  <div class="author">by 偷懒机器</div>
+</div>
+
+<div class="container">
+  <div class="section-title">📦 全部工具</div>
+
+  <a href="generator.html" class="tool-card gold">
+    <div class="card-top">
+      <div class="card-icon">✍️</div>
+      <div class="card-info">
+        <h2>精酿笔记生成器</h2>
+        <span class="badge">核心工具</span>
+      </div>
+    </div>
+    <div class="card-desc">
+      输入酒款关键信息，一键生成小红书爆款文案。自动美化感官描述、智能匹配标题策略、生成标签和封面建议。支持单酒测评、合集推荐、趋势热点、探店四种类型。
+    </div>
+    <div class="card-features">
+      <span class="feature-tag">🎯 智能标题</span>
+      <span class="feature-tag">✨ 感官美化</span>
+      <span class="feature-tag">📋 一键复制</span>
+      <span class="feature-tag">🏷️ 自动标签</span>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a href="schedule.html" class="tool-card teal">
+    <div class="card-top">
+      <div class="card-icon">📅</div>
+      <div class="card-info">
+        <h2>30天内容排期表</h2>
+        <span class="badge">运营规划</span>
+      </div>
+    </div>
+    <div class="card-desc">
+      精心规划的30天内容日历，包含具体选题方向、标题参考、标签建议和最佳发布时间。按「7:2:1」内容矩阵分配（生活方式70%/趋势热点20%/直接种草10%）。
+    </div>
+    <div class="card-features">
+      <span class="feature-tag">📊 四周递进</span>
+      <span class="feature-tag">🕐 发布时间</span>
+      <span class="feature-tag">🏷️ 标签建议</span>
+      <span class="feature-tag">📈 数据复盘</span>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+</div>
+
+<div class="footer">
+  <p>🍺 精酿工具箱 · 让好酒被更多人看见</p>
+  <p style="margin-top: 4px;">Made with ❤️ by 偷懒机器</p>
+</div>
+
+</body>
+</html>

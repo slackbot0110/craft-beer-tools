@@ -1,0 +1,15 @@
+# WorkBuddy 工作目录
+.workbuddy/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+
+# 备份文件
+*.bak
+*.backup

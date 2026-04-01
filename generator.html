@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>精酿笔记生成器 - 精酿工具箱</title>
+<meta name="description" content="精酿啤酒小红书笔记一键生成器：输入酒款信息，自动生成爆款标题、结构化正文、标签和封面建议。">
+<meta property="og:title" content="精酿笔记生成器 - 精酿工具箱">
+<meta property="og:description" content="输入酒款信息，一键生成小红书爆款文案。支持单酒测评、合集推荐、趋势热点、探店四种类型。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>">
+<style>
+  :root {
+    --gold: #e2b04a;
+    --gold-light: #fdf6e3;
+    --red: #ff6b6b;
+    --red-light: #fff0f0;
+    --teal: #4ecdc4;
+    --teal-light: #e8faf8;
+    --bg: #f5f0eb;
+    --card: #ffffff;
+    --text: #2c2c2c;
+    --muted: #888;
+    --border: #eee;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    color: white;
+    padding: 32px 20px 24px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 { font-size: 22px; margin-bottom: 4px; }
+  .header h1 span { color: var(--gold); }
+  .header p { font-size: 13px; opacity: 0.6; }
+
+  .container { max-width: 800px; margin: 20px auto; padding: 0 16px 60px; }
+
+  /* Type Selector */
+  .type-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .type-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .type-btn:hover { border-color: #ddd; transform: translateY(-2px); }
+  .type-btn.active { border-color: var(--gold); background: var(--gold-light); }
+  .type-btn .emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+  .type-btn .label { font-size: 12px; font-weight: 600; color: #555; }
+  .type-btn .sub { font-size: 10px; color: #aaa; margin-top: 2px; }
+  .type-btn.active .label { color: #c49520; }
+
+  /* Form Card */
+  .form-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .form-card h3 {
+    font-size: 15px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .form-group label .req { color: var(--red); font-size: 14px; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+    background: #fafafa;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--gold);
+    background: white;
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-group .hint { font-size: 11px; color: #aaa; }
+
+  /* Dynamic Fields Container */
+  .dynamic-fields { margin-top: 12px; }
+  .beer-entry {
+    background: #f9f7f4;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+  }
+  .beer-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .beer-entry-header span { font-size: 12px; font-weight: 600; color: #888; }
+  .beer-entry-header button {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 4px;
+  }
+  .beer-entry-header button:hover { color: var(--red); }
+  .add-beer-btn {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    background: none;
+    color: #aaa;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .add-beer-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Generate Button */
+  .generate-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold), #d4a03a);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 16px rgba(226,176,74,0.3);
+  }
+  .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(226,176,74,0.4); }
+  .generate-btn:active { transform: translateY(0); }
+
+  /* Output Section */
+  .output-section { display: none; margin-top: 24px; }
+  .output-section.show { display: block; }
+
+  .output-card {
+    background: var(--card);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .output-header {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .output-header h3 { font-size: 15px; }
+  .copy-btn {
+    background: var(--gold-light);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #c49520;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .copy-btn:hover { background: #f5e8c0; }
+  .copy-btn.copied { background: #d4edda; color: #28a745; }
+
+  .output-body {
+    padding: 20px 24px;
+  }
+  .output-body .title-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .output-body .content-text {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .output-body .cover-text {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.7;
+  }
+  .output-body .tags-text {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .output-body .tag-item {
+    background: var(--gold-light);
+    color: #c49520;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* Cover Suggestion */
+  .cover-suggest {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 12px;
+  }
+  .cover-suggest h4 { font-size: 13px; color: var(--gold); margin-bottom: 8px; }
+  .cover-suggest p { font-size: 13px; line-height: 1.7; opacity: 0.9; }
+
+  /* Copy All */
+  .copy-all-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .copy-all-btn:hover { transform: translateY(-2px); }
+  .copy-all-btn.copied { background: linear-gradient(135deg, #28a745, #20873a); }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .type-selector { grid-template-columns: repeat(2, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+    .output-body { padding: 16px; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #333;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" style="display:inline-block;margin-bottom:8px;font-size:13px;color:rgba(255,255,255,0.6);text-decoration:none;">← 返回工具箱首页</a>
+  <h1>🍺 精酿笔记<span>一键生成器</span></h1>
+  <p>填入关键信息 → 自动生成标题、正文、标签、封面建议 → 一键复制发布</p>
+</div>
+
+<div class="container">
+
+  <!-- Step 1: 选择类型 -->
+  <div class="form-card">
+    <h3>📝 第一步：选择笔记类型</h3>
+    <div class="type-selector">
+      <div class="type-btn active" data-type="review" onclick="switchType('review')">
+        <span class="emoji">🍺</span>
+        <div class="label">单酒测评</div>
+        <div class="sub">深度测评一款酒</div>
+      </div>
+      <div class="type-btn" data-type="collection" onclick="switchType('collection')">
+        <span class="emoji">📦</span>
+        <div class="label">合集推荐</div>
+        <div class="sub">多款酒推荐清单</div>
+      </div>
+      <div class="type-btn" data-type="trending" onclick="switchType('trending')">
+        <span class="emoji">🔥</span>
+        <div class="label">趋势热点</div>
+        <div class="sub">行业话题/争议</div>
+      </div>
+      <div class="type-btn" data-type="explore" onclick="switchType('explore')">
+        <span class="emoji">📍</span>
+        <div class="label">探店</div>
+        <div class="sub">精酿吧探店</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: 填写信息 -->
+  <div class="form-card">
+    <h3>📝 第二步：填写关键信息</h3>
+
+    <!-- 单酒测评字段 -->
+    <div id="fields-review">
+      <div class="form-row">
+        <div class="form-group">
+          <label>品牌/酒厂名 <span class="req">*</span></label>
+          <input type="text" id="r-brand" placeholder="如：沙坡尾、拳击猫">
+        </div>
+        <div class="form-group">
+          <label>酒款名 <span class="req">*</span></label>
+          <input type="text" id="r-name" placeholder="如：角头2.0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>啤酒风格 <span class="req">*</span></label>
+          <input type="text" id="r-style" placeholder="如：双倍浑浊IPA">
+        </div>
+        <div class="form-group">
+          <label>酒精度 ABV <span class="req">*</span></label>
+          <input type="text" id="r-abv" placeholder="如：8%">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>参考价格 <span class="req">*</span></label>
+          <input type="text" id="r-price" placeholder="如：22元/500ml">
+        </div>
+        <div class="form-group">
+          <label>购买渠道</label>
+          <input type="text" id="r-channel" placeholder="如：淘宝/便利店/精酿吧">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>外观颜色 <span class="req">*</span></label>
+          <input type="text" id="r-look" placeholder="如：浑浊橙黄色，泡沫绵密但消散快">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>闻香 <span class="req">*</span></label>
+          <input type="text" id="r-aroma" placeholder="如：柑橘香气、松针、西柚">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>口感描述 <span class="req">*</span></label>
+          <textarea id="r-taste" placeholder="如：入口饱满的柑橘果汁感，中段松针微涩和麦芽饼干底香，后端有些许酒精刺激感"></textarea>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>总体评价/一句话总结 <span class="req">*</span></label>
+          <input type="text" id="r-summary" placeholder="如：性价比很高的国产口粮，果味浓郁但不够平衡">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>适合人群</label>
+          <input type="text" id="r-forwho" placeholder="如：喜欢果汁感IPA的酒友 / 精酿入门爱好者">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>个人故事/背景（选填，增加人设感）</label>
+          <textarea id="r-story" placeholder="如：作为一个闽南人，'角头'这个词让我很亲切…"></textarea>
+          <span class="hint">不填则不加入，填了会自然融入正文</span>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>对比对象（选填）</label>
+          <input type="text" id="r-compare" placeholder="如：角头1.0 / 同价位其他IPA">
+        </div>
+      </div>
+    </div>
+
+    <!-- 合集推荐字段 -->
+    <div id="fields-collection" style="display:none">
+      <div class="form-row full">
+        <div class="form-group">
+          <label>合集主题 <span class="req">*</span></label>
+          <input type="text" id="c-topic" placeholder="如：便利店口粮酒 / 百元内必喝 / 新手入门">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>酒款数量 <span class="req">*</span></label>
+          <input type="text" id="c-count" placeholder="如：5" style="max-width:80px">
+        </div>
+      </div>
+      <div class="dynamic-fields" id="collection-items">
+        <div class="beer-entry" data-index="0">
+          <div class="beer-entry-header">
+            <span>🍺 酒款 #1</span>
+            <button onclick="removeBeer(this)" title="删除">✕</button>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>品牌+酒款名</label>
+              <input type="text" class="c-item-name" placeholder="如：拳击猫 猛击">
+            </div>
+            <div class="form-group">
+              <label>风格</label>
+              <input type="text" class="c-item-style" placeholder="如：IPA">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>价格</label>
+              <input type="text" class="c-item-price" placeholder="如：25元">
+            </div>
+            <div class="form-group">
+              <label>一句话亮点</label>
+              <input type="text" class="c-item-highlight" placeholder="如：果味爆炸，入门首选">
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="add-beer-btn" onclick="addBeer()">+ 添加酒款</button>
+    </div>
+
+    <!-- 趋势热点字段 -->
+    <div id="fields-trending" style="display:none">
+      <div class="form-row full">
+        <div class="form-group">
+          <label>话题主题 <span class="req">*</span></label>
+          <input type="text" id="t-topic" placeholder="如：精酿啤酒智商税 / 国产vs进口 / 2026趋势">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>你的核心观点 <span class="req">*</span></label>
+          <textarea id="t-opinion" placeholder="如：精酿的溢价主要来自原料成本和工艺复杂度，但确实存在品牌溢价过高的现象…"></textarea>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>支撑论据（2-3个点）</label>
+          <textarea id="t-points" placeholder="如：1.进口酒花成本是国产的3倍 2.桶陈工艺需要6-12个月 3.限量款产量低导致单价高"></textarea>
+          <span class="hint">每行一个论据</span>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>涉及的酒款/品牌（选填）</label>
+          <input type="text" id="t-brands" placeholder="如： BrewDog、高大师、牛啤堂">
+        </div>
+      </div>
+    </div>
+
+    <!-- 探店字段 -->
+    <div id="fields-explore" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label>酒吧名称 <span class="req">*</span></label>
+          <input type="text" id="e-name" placeholder="如：大跃啤酒">
+        </div>
+        <div class="form-group">
+          <label>所在城市 <span class="req">*</span></label>
+          <input type="text" id="e-city" placeholder="如：厦门">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>地址 <span class="req">*</span></label>
+          <input type="text" id="e-address" placeholder="如：思明区沙坡尾60号">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>人均消费</label>
+          <input type="text" id="e-cost" placeholder="如：80-120元">
+        </div>
+        <div class="form-group">
+          <label>推荐时段</label>
+          <input type="text" id="e-time" placeholder="如：工作日晚间 / 周末下午">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>酒吧风格/特色 <span class="req">*</span></label>
+          <input type="text" id="e-style" placeholder="如：工业风装修、主打国产精酿、有20个酒头">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>推荐酒款（2-3款）<span class="req">*</span></label>
+          <textarea id="e-beers" placeholder="如：1.自酿IPA - 果味浓郁，招牌款 2.进口世涛 - 巧克力味十足"></textarea>
+          <span class="hint">每行一款</span>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group">
+          <label>总体感受 <span class="req">*</span></label>
+          <textarea id="e-feeling" placeholder="如：氛围很棒，老板懂酒，适合和朋友聊天喝酒。唯一缺点是位置有点偏…"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Generate -->
+  <button class="generate-btn" onclick="generate()">✨ 一键生成笔记</button>
+
+  <!-- Output -->
+  <div class="output-section" id="output-section">
+
+    <div class="output-card">
+      <div class="output-header">
+        <h3>📌 标题（复制后粘贴到小红书标题栏）</h3>
+        <button class="copy-btn" onclick="copyText('output-title', this)">📋 复制</button>
+      </div>
+      <div class="output-body">
+        <div class="title-text" id="output-title"></div>
+      </div>
+    </div>
+
+    <div class="output-card">
+      <div class="output-header">
+        <h3>📝 正文（复制后粘贴到小红书正文）</h3>
+        <button class="copy-btn" onclick="copyText('output-content', this)">📋 复制</button>
+      </div>
+      <div class="output-body">
+        <div class="content-text" id="output-content"></div>
+      </div>
+    </div>
+
+    <div class="output-card">
+      <div class="output-header">
+        <h3>#️⃣ 标签（复制后粘贴到正文末尾）</h3>
+        <button class="copy-btn" onclick="copyText('output-tags-raw', this)">📋 复制</button>
+      </div>
+      <div class="output-body">
+        <div class="tags-text" id="output-tags"></div>
+        <div id="output-tags-raw" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="output-card">
+      <div class="output-header">
+        <h3>📸 封面建议</h3>
+      </div>
+      <div class="output-body">
+        <div class="cover-suggest" id="output-cover"></div>
+      </div>
+    </div>
+
+    <button class="copy-all-btn" onclick="copyAll()">
+      📋 一键复制全部（标题+正文+标签）
+    </button>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">已复制到剪贴板！</div>
+
+<script>
+let currentType = 'review';
+let beerCounter = 1;
+
+// ===== 核心：感官美化引擎 =====
+
+// 闻香关键词 → 画面感改写
+const aromaEnhance = {
+  '柑橘': '一开瓶就是满满的柑橘香，像刚剥了一个大橙子',
+  '橙子': '橙子香气扑面而来，清新到像在果园里',
+  '西柚': '明显的西柚气息，带着一点清新的苦',
+  '柚子': '柚子的清香，夏天喝太舒服了',
+  '松针': '松针的草本气息，像走进了森林',
+  '热带水果': '热带水果的香气炸弹，芒果百香果全来了',
+  '芒果': '浓郁的芒果香甜，闻着就想喝',
+  '百香果': '百香果的酸甜香气，很清爽',
+  '菠萝': '菠萝的果香，热情又奔放',
+  '荔枝': '淡淡的荔枝清甜，很高级的味道',
+  '桃子': '水蜜桃的甜香，少女心满满',
+  '花香': '花香馥郁，像走进了一片花田',
+  '玫瑰': '淡淡的玫瑰花瓣香气，优雅细腻',
+  '巧克力': '浓郁的巧克力香气，像在闻一杯热可可',
+  '咖啡': '咖啡豆的醇香，不喝酒都以为是拿铁',
+  '焦糖': '焦糖的甜香，温暖又治愈',
+  '太妃糖': '太妃糖的香甜气息，甜蜜感拉满',
+  '烘焙': '烘焙面包的麦香，扎实又温暖',
+  '饼干': '麦芽饼干般的香气，闻着就想吃',
+  '面包': '新鲜面包出炉的麦香，很治愈',
+  '奶油': '奶油般的柔滑香气，绵密又温柔',
+  '香草': '香草的甜美，像吃了一口冰淇淋',
+  '烟熏': '烟熏的气息，很有个性，像篝火旁的味道',
+  '木质': '淡淡的木桶香气，沉稳内敛',
+  '酒桶': '橡木桶带来的香草和椰子气息，层次感很足',
+  '草本': '草本植物的清新，自然不做作',
+  '泥土': '淡淡的泥土气息，很有"地感"',
+  '青椒': '青椒的清香，很典型的美式酒花特征',
+  '葡萄柚': '葡萄柚的清香带一点点苦，很上头',
+  '草莓': '草莓的香甜，酸酸甜甜很可爱',
+  '覆盆子': '覆盆子的浆果香气，优雅又活泼',
+  '樱桃': '樱桃的果香，像在吃水果罐头',
+  '柠檬': '柠檬的清爽酸香，很解腻',
+  '杏子': '杏子的甜香，很特别的果味',
+  '李子': '李子的酸甜气息，很有层次',
+  '香料': '淡淡的香料气息，复杂又迷人',
+  '肉桂': '肉桂的温暖香气，冬天喝太合适了',
+  '丁香': '丁香的芬芳，和果味碰撞很奇妙',
+  '白葡萄': '白葡萄的清甜，干净又优雅',
+};
+
+// 口感关键词 → 画面感改写
+const tasteEnhance = {
+  '果汁感': '像喝了一杯鲜榨果汁，完全不像在喝啤酒',
+  '饱满': '酒体饱满扎实，每一口都有料',
+  '清爽': '清爽得像一阵凉风，喝完还想再来一口',
+  '干脆': '干脆利落，一点都不拖泥带水',
+  '丝滑': '丝滑的触感在舌尖流过，像在喝液体丝绸',
+  '绵密': '泡沫在口腔里绵密得像云朵',
+  '涩': '带着一点收敛的涩感，让口感更有层次',
+  '苦': '苦度明显但不突兀，像在嚼西柚皮',
+  '甜': '尾段有一丝甜意，中和了苦度，很平衡',
+  '酸': '酸得恰到好处，像在喝一杯果酸饮料',
+  '刺激': '酒精感微微刺激，提醒你这不是普通啤酒',
+  '酒精感': '酒精的温热感在喉咙慢慢散开，有劲道',
+  '炸裂': '风味在嘴里炸裂开来，像放了一场烟花',
+  '层次感': '层次分明——前中后段 flavors 完全不同，越品越有东西',
+  '复杂': '复杂度很高，每喝一口都能发现新味道',
+  '平衡': '苦甜酸涩平衡得刚刚好，没有哪个味道抢戏',
+  '饼干底': '麦芽的饼干底香托住整个酒体，很稳',
+  '麦芽': '麦芽的甜味从中段开始浮现，温暖又扎实',
+  '焦糖': '焦糖的甜在后段慢慢展开，像喝了一口太妃糖',
+  '巧克力': '巧克力的醇厚在嘴里化开，像在喝一杯黑巧',
+  '咖啡': '咖啡的苦韵在尾段悠长，余韵十足',
+  '烟熏': '烟熏味在收尾时飘出来，很有记忆点',
+  '热带': '热带水果的甜蜜感贯穿始终，像在度假',
+  '柑橘': '柑橘的风味从头到尾都在，很明确的主线',
+  '松针': '松针的草本气息在中段撑起骨架，有棱有角',
+  '干爽': '收口干爽利落，不留负担',
+  '厚重': '酒体厚重大气，适合慢慢品',
+  '轻盈': '轻盈得像在喝云朵，毫无压力',
+  '杀口感': '气泡在舌头上的刺痛感很舒服，很解渴',
+  '回甘': '咽下去之后回甘明显，让人忍不住再来一口',
+  '余韵': '余韵悠长，喝完之后嘴里还残留着香气',
+};
+
+// 情绪词库
+const moodWords = {
+  good: ['惊艳', '惊喜', '意外', '上头', '好喝到停不下来', '宝藏', '天花板', '绝了', '值回票价', '回购预定'],
+  mid: ['还行', '中规中矩', '没有踩雷', '对得起这个价', '值得一试', '可以喝', '不出错的选择'],
+  bad: ['踩雷', '失望', '翻车', '劝退', '不值这个价', '期望太高了', '一言难尽', '不太行'],
+};
+
+const hookOpenings = {
+  good: [
+    '喝完这杯，我沉默了。真的有点东西。',
+    '说实话没想到这个价位能喝到这种水平…',
+    '如果满分10分，这杯我给8.5。真的。',
+    '朋友们，这杯被我列入回购清单了。',
+    '本来没抱太大期望，结果直接被反转了。',
+  ],
+  mid: [
+    '这个价位，喝到这个水平，我觉得OK。',
+    '不吹不黑，说说我真实的喝酒体验。',
+    '看完测评你就知道值不值了。',
+    '喝之前做功课搜了一圈评价，现在说说我的感受。',
+    '今天开一瓶{brand}{name}，客观聊聊这杯酒。',
+  ],
+  bad: [
+    '这杯…怎么说呢，有点一言难尽。',
+    '期望太高，现实太骨感。',
+    '全网吹爆的这款，我喝完只想说…',
+    '不推荐，除非你想体验一下什么是期望落空。',
+  ],
+};
+
+const ctaEndings = [
+  '你们喝过{brand}的酒吗？觉得{beers}哪个更好喝？评论区聊聊👇',
+  '这杯你会给几分？评论区打分👇',
+  '你们最近在喝什么精酿？评论区交换酒单！',
+  '觉得有用的点个收藏，下次买酒翻出来看👇',
+  '想看{brand}其他酒款测评的扣1，人多我就安排！',
+  '同价位你们有什么私藏推荐？评论区教教我！',
+];
+
+// ===== 感官美化核心函数 =====
+
+function enhanceAroma(raw) {
+  let result = raw;
+  let matched = false;
+  for (const [keyword, enhanced] of Object.entries(aromaEnhance)) {
+    if (result.includes(keyword)) {
+      result = result.replace(new RegExp(keyword, 'g'), enhanced);
+      matched = true;
+    }
+  }
+  if (!matched) {
+    // 如果没匹配到关键词，给一个通用的美化包装
+    const wrappers = [
+      `一靠近杯口就能感受到——${raw}，闻起来就很有食欲`,
+      `把鼻子凑过去，${raw}，非常有辨识度`,
+      `闻香是我最喜欢的部分：${raw}，层次分明`,
+    ];
+    result = wrappers[Math.floor(Math.random() * wrappers.length)];
+  }
+  return result;
+}
+
+function enhanceTaste(raw) {
+  let result = raw;
+  let matched = false;
+  for (const [keyword, enhanced] of Object.entries(tasteEnhance)) {
+    if (result.includes(keyword)) {
+      result = result.replace(new RegExp(keyword, 'g'), enhanced);
+      matched = true;
+    }
+  }
+  if (!matched) {
+    const wrappers = [
+      `入口的第一感觉：${raw}`,
+      `喝下去之后，${raw}，整体感受很明确`,
+      `口感上，${raw}，这个风格该有的都有了`,
+    ];
+    result = wrappers[Math.floor(Math.random() * wrappers.length)];
+  }
+  return result;
+}
+
+function generateTranslation(raw) {
+  // 生成大白话翻译
+  const lower = raw.toLowerCase();
+  if (lower.includes('苦') && lower.includes('果') || lower.includes('柑橘') || lower.includes('西柚')) {
+    return '简单说就是像喝了一口带麦香的西柚汁，果味浓但不甜腻';
+  }
+  if (lower.includes('巧克力') || lower.includes('咖啡')) {
+    return '简单说就是像喝了一杯加了酒精的黑巧拿铁，冬天喝太幸福了';
+  }
+  if (lower.includes('酸') && lower.includes('果')) {
+    return '简单说就是像喝了一杯微醺版的水果茶，酸爽解腻';
+  }
+  if (lower.includes('酒桶') || lower.includes('橡木') || lower.includes('桶陈')) {
+    return '简单说就是口感很"高级"，每一口都能喝出时间的味道';
+  }
+  if (lower.includes('清爽') || lower.includes('轻盈') || lower.includes('拉格') || lower.includes('皮尔森')) {
+    return '简单说就是一口下去很爽，适合大口喝，配烧烤绝了';
+  }
+  if (lower.includes('厚重') || lower.includes('世涛') || lower.includes('波特')) {
+    return '简单说就是像喝了一杯液体甜点，小口慢品才有感觉';
+  }
+  if (lower.includes('层次') || lower.includes('复杂')) {
+    return '简单说就是每喝一口都能发现新味道，越喝越有东西';
+  }
+  if (lower.includes('果汁感') || lower.includes('浑浊') || lower.includes('neipa') || lower.includes('hazy')) {
+    return '简单说就是不像在喝啤酒，更像一杯有酒精的鲜榨果汁';
+  }
+  if (lower.includes('烟熏')) {
+    return '简单说就是像在篝火旁喝了一杯带着烟味的酒，很有个性';
+  }
+  if (lower.includes('香料') || lower.includes('肉桂') || lower.includes('丁香')) {
+    return '简单说就是像喝了一杯加了料的冬日特饮，暖呼呼的';
+  }
+  if (lower.includes('花香') || lower.includes('玫瑰') || lower.includes('小麦')) {
+    return '简单说就是温柔细腻，连不怎么喝酒的朋友都能接受';
+  }
+  // 通用翻译
+  const generalTranslations = [
+    '简单说就是有个性的一款酒，喜欢这个风格的会爱死',
+    '简单说就是值这个价，不踩雷，值得试试',
+    '简单说就是喝完你会记住它，至少不会无聊',
+  ];
+  return generalTranslations[Math.floor(Math.random() * generalTranslations.length)];
+}
+
+// 判断评价倾向
+function judgeSentiment(summary) {
+  const lower = summary.toLowerCase();
+  const goodWords = ['好喝', '推荐', '惊喜', '惊艳', '值得', '天花板', '回购', '能打', '不错', '很好', '喜欢', '性价比', '经典', '满足', '超预期', '好评', '优秀'];
+  const badWords = ['踩雷', '失望', '不值', '一般', '不行', '翻车', '劝退', '难喝', '不好', '避雷', '后悔', '无语', '翻车', '差评'];
+
+  let score = 0;
+  goodWords.forEach(w => { if (lower.includes(w)) score += 1; });
+  badWords.forEach(w => { if (lower.includes(w)) score -= 1; });
+  if (score > 0) return 'good';
+  if (score < 0) return 'bad';
+  return 'mid';
+}
+
+// 智能标题生成
+function generateSmartTitle(brand, name, style, price, summary, sentiment) {
+  const priceNum = price.match(/\d+/)?.[0] || price;
+  const shortBrand = brand.length > 6 ? brand.substring(0, 6) : brand;
+
+  if (sentiment === 'good') {
+    const titles = [
+      `${style}推荐｜${shortBrand}${name}，${priceNum}块喝出什么水平？`,
+      `精酿测评｜${priceNum}块的${style}，${brand}真的能打`,
+      `${style}推荐｜${brand}${name}，这个价位有点东西`,
+      `喝到意外惊喜！${brand}${name}测评，${priceNum}块值不值`,
+      `${style}天花板？${brand}${name}开箱测评`,
+    ];
+    return titles[Math.floor(Math.random() * titles.length)];
+  } else if (sentiment === 'bad') {
+    const titles = [
+      `精酿测评｜${brand}${name}，${priceNum}块值不值这个价？`,
+      `${style}测评｜${brand}${name}，有点一言难尽…`,
+      `全网吹爆的${brand}${name}，我喝完只想说…`,
+      `${priceNum}块的${style}，${brand}到底行不行？`,
+      `精酿避雷？${brand}${name}测评，说点真话`,
+    ];
+    return titles[Math.floor(Math.random() * titles.length)];
+  } else {
+    const titles = [
+      `${style}测评｜${brand}${name}，${priceNum}块这个水平怎么样`,
+      `精酿测评｜${brand}${name}，不吹不黑聊聊真实感受`,
+      `${style}推荐｜${brand}${name}，对得起这个价吗`,
+      `${brand}${name}开箱测评，客观聊聊这杯${style}`,
+      `${priceNum}块的${style}，${brand}${name}详细测评`,
+    ];
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
+}
+
+// ===== UI逻辑 =====
+
+function switchType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-type="${type}"]`).classList.add('active');
+  document.querySelectorAll('[id^="fields-"]').forEach(f => f.style.display = 'none');
+  document.getElementById(`fields-${type}`).style.display = 'block';
+  document.getElementById('output-section').classList.remove('show');
+}
+
+function addBeer() {
+  beerCounter++;
+  const container = document.getElementById('collection-items');
+  const html = `
+    <div class="beer-entry" data-index="${beerCounter}">
+      <div class="beer-entry-header">
+        <span>🍺 酒款 #${beerCounter}</span>
+        <button onclick="removeBeer(this)" title="删除">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>品牌+酒款名</label>
+          <input type="text" class="c-item-name" placeholder="如：拳击猫 猛击">
+        </div>
+        <div class="form-group">
+          <label>风格</label>
+          <input type="text" class="c-item-style" placeholder="如：IPA">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>价格</label>
+          <input type="text" class="c-item-price" placeholder="如：25元">
+        </div>
+        <div class="form-group">
+          <label>一句话亮点</label>
+          <input type="text" class="c-item-highlight" placeholder="如：果味爆炸，入门首选">
+        </div>
+      </div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+function removeBeer(btn) {
+  const entry = btn.closest('.beer-entry');
+  entry.remove();
+  document.querySelectorAll('#collection-items .beer-entry').forEach((e, i) => {
+    e.querySelector('.beer-entry-header span').textContent = `🍺 酒款 #${i + 1}`;
+  });
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg || '已复制到剪贴板！';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function copyText(id, btn) {
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    if (btn) { btn.textContent = '✅ 已复制'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '📋 复制'; btn.classList.remove('copied'); }, 2000); }
+    showToast();
+  });
+}
+
+function copyAll() {
+  const title = document.getElementById('output-title').textContent;
+  const content = document.getElementById('output-content').textContent;
+  const tags = document.getElementById('output-tags-raw').textContent;
+  const full = title + '\n\n' + content + '\n\n' + tags;
+  navigator.clipboard.writeText(full).then(() => {
+    const btn = document.querySelector('.copy-all-btn');
+    btn.textContent = '✅ 全部已复制！';
+    btn.classList.add('copied');
+    showToast('全部内容已复制到剪贴板！');
+    setTimeout(() => { btn.innerHTML = '📋 一键复制全部（标题+正文+标签）'; btn.classList.remove('copied'); }, 3000);
+  });
+}
+
+function generate() {
+  const output = document.getElementById('output-section');
+
+  if (currentType === 'review') {
+    generateReview();
+  } else if (currentType === 'collection') {
+    generateCollection();
+  } else if (currentType === 'trending') {
+    generateTrending();
+  } else if (currentType === 'explore') {
+    generateExplore();
+  }
+
+  output.classList.add('show');
+  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ===== 核心：单酒测评 AI改写 =====
+function generateReview() {
+  const brand = val('r-brand'), name = val('r-name'), style = val('r-style');
+  const abv = val('r-abv'), price = val('r-price'), channel = val('r-channel');
+  const look = val('r-look'), aroma = val('r-aroma'), taste = val('r-taste');
+  const summary = val('r-summary'), forwho = val('r-forwho');
+  const story = val('r-story'), compare = val('r-compare');
+
+  if (!brand || !name || !style || !abv || !price || !look || !aroma || !taste || !summary) {
+    showToast('请填写所有带 * 的必填项！'); return;
+  }
+
+  const sentiment = judgeSentiment(summary);
+  const priceNum = price.match(/\d+/)?.[0] || price;
+
+  // 标题：根据评价倾向智能选策略
+  const title = generateSmartTitle(brand, name, style, price, summary, sentiment);
+
+  // 开头钩子
+  const hooks = hookOpenings[sentiment];
+  let hook = hooks[Math.floor(Math.random() * hooks.length)];
+  hook = hook.replace('{brand}', brand);
+
+  // 闻香美化
+  const enhancedAroma = enhanceAroma(aroma);
+
+  // 口感美化
+  const enhancedTaste = enhanceTaste(taste);
+
+  // 人话翻译
+  const translation = generateTranslation(taste + ' ' + aroma);
+
+  // 情绪标签
+  const mood = moodWords[sentiment][Math.floor(Math.random() * moodWords[sentiment].length)];
+
+  // CTA
+  const ctas = ctaEndings;
+  let cta = ctas[Math.floor(Math.random() * ctas.length)];
+  cta = cta.replace('{brand}', brand);
+  if (compare) {
+    cta = `${compare}——你觉得哪个更好喝？评论区站队👇`;
+  }
+
+  // 组装正文
+  let body = '';
+  body += `${hook}🍺\n\n`;
+
+  // 信息卡
+  body += `⭐️ ${brand} ${name}\n`;
+  body += `🍺 风格：${style}\n`;
+  body += `🎱 ABV：${abv}\n`;
+  if (channel) body += `📍 购买：${channel}\n`;
+  body += `💰 参考价：${price}\n\n`;
+
+  // 感官测评（美化后）
+  body += `👀 酒液：${look}\n\n`;
+  body += `👃 闻香：\n${enhancedAroma}\n\n`;
+  body += `👅 口感：\n${enhancedTaste}\n\n`;
+
+  // 人话翻译
+  body += `💡 ${translation}\n\n`;
+
+  // 总评
+  body += `📝 总评：${summary}\n`;
+  body += `🏷️ 关键词：${mood}\n`;
+
+  if (forwho) {
+    body += `\n👤 适合：${forwho}\n`;
+  }
+
+  // 个人故事
+  if (story) {
+    body += `\n💬 ${story}`;
+  }
+
+  // CTA结尾
+  body += `\n\n${cta}`;
+
+  // 标签
+  const styleTags = generateStyleTags(style);
+  const tags = [
+    '#精酿啤酒', '#精酿推荐', '#精酿测评',
+    ...styleTags,
+    '#口粮酒推荐', '#微醺日常',
+    sentiment === 'good' ? '#精酿种草' : (sentiment === 'bad' ? '#精酿避雷' : '#精酿真实测评'),
+    `#${brand}精酿`,
+  ];
+  const uniqueTags = [...new Set(tags)].slice(0, 10);
+
+  // 封面建议
+  const coverTitle = sentiment === 'good' ? `${priceNum}块的${style}，有点东西` :
+                     sentiment === 'bad' ? `${brand}${name}，值不值？` :
+                     `${brand}${name}，客观聊聊`;
+  const cover = `<h4>📸 封面设计建议</h4>
+<p>【构图】手持${brand}${name}酒瓶对自然光拍摄，瓶身logo清晰可见，背景虚化<br>
+【大字贴纸】"${coverTitle}"<br>
+【小字】${sentiment === 'good' ? '✨ 值得回购' : (sentiment === 'bad' ? '🤔 说点真话' : '📊 客观测评')}<br>
+【配色】利用啤酒本身的颜色作为主色调，深色背景+酒瓶对比度拉满<br>
+【加分项】酒液倒入杯中的瞬间抓拍（泡沫飞溅的照片点击率超高）</p>`;
+
+  renderOutput(title, body, uniqueTags, cover);
+}
+
+// ===== 合集推荐 =====
+function generateCollection() {
+  const topic = val('c-topic'), count = val('c-count');
+  if (!topic || !count) { showToast('请填写合集主题和数量！'); return; }
+
+  const entries = document.querySelectorAll('#collection-items .beer-entry');
+  if (entries.length === 0) { showToast('至少添加一款酒！'); return; }
+
+  const beers = [];
+  entries.forEach(e => {
+    const n = e.querySelector('.c-item-name')?.value || '';
+    const s = e.querySelector('.c-item-style')?.value || '';
+    const p = e.querySelector('.c-item-price')?.value || '';
+    const h = e.querySelector('.c-item-highlight')?.value || '';
+    if (n) beers.push({ name: n, style: s, price: p, highlight: h });
+  });
+
+  if (beers.length === 0) { showToast('至少填写一款酒的名称！'); return; }
+
+  const num = beers.length;
+  const hooks = [
+    `喝了${num * 10}多款精酿，精选出这${num}款${topic}，每款都是亲测不踩雷👇`,
+    `${topic}怎么选？别瞎买了，这${num}款先闭眼入👇`,
+    `整理了一周的${topic}清单，全是回购过的好酒👇`,
+  ];
+  const title = `精酿推荐｜${num}款${topic}，闭眼入不踩雷`;
+
+  let body = `${hooks[Math.floor(Math.random() * hooks.length)]}\n\n`;
+
+  beers.forEach((b, i) => {
+    body += `${numEmoji(i + 1)} ${b.name}`;
+    if (b.style) body += `｜${b.style}`;
+    body += `\n`;
+    if (b.price) body += `   💰 ${b.price}`;
+    body += `\n`;
+    const enhanced = enhanceHighlight(b.highlight || '值得一试');
+    body += `   ✨ ${enhanced}\n\n`;
+  });
+
+  body += `📌 以上全部亲测，觉得有用的话点个收藏，下次买酒翻出来看！\n\n`;
+  body += `你们有什么私藏的${topic}？评论区交换酒单！👇`;
+
+  const tags = ['#精酿推荐', '#精酿啤酒', '#口粮酒推荐', '#精酿入门', '#啤酒推荐', '#微醺日常', '#精酿测评', '#好物推荐', '#合集', `#${topic}`];
+  const cover = `<h4>📸 封面设计建议</h4>
+<p>【构图】${num}款酒并排/矩阵排列，整齐排列视觉冲击力强<br>
+【大字贴纸】"${num}款${topic}" 或 "闭眼入不踩雷"<br>
+【小字】精酿推荐合集｜亲测不踩雷<br>
+【提示】酒瓶标签朝前，确保品牌名清晰可见；背景用深色纯色布，突出酒瓶</p>`;
+
+  renderOutput(title, body, tags, cover);
+}
+
+function enhanceHighlight(raw) {
+  const lower = raw.toLowerCase();
+  if (lower.includes('果') || lower.includes('果汁') || lower.includes('柑橘') || lower.includes('热带')) {
+    return raw + '，果味党必冲';
+  }
+  if (lower.includes('苦') || lower.includes('ipa') || lower.includes('松针')) {
+    return raw + '，苦味爱好者会爱';
+  }
+  if (lower.includes('入门') || lower.includes('新手') || lower.includes('第一次')) {
+    return raw + '，零踩雷入门首选';
+  }
+  if (lower.includes('性价比') || lower.includes('便宜') || lower.includes('口粮')) {
+    return raw + '，钱包友好型选手';
+  }
+  if (lower.includes('浓郁') || lower.includes('厚重') || lower.includes('世涛')) {
+    return raw + '，重口味爱好者别错过';
+  }
+  if (lower.includes('清爽') || lower.includes('清淡') || lower.includes('轻盈')) {
+    return raw + '，适合不常喝酒的朋友';
+  }
+  return raw;
+}
+
+// ===== 趋势热点 =====
+function generateTrending() {
+  const topic = val('t-topic'), opinion = val('t-opinion');
+  const points = val('t-points'), brands = val('t-brands');
+  if (!topic || !opinion) { showToast('请填写话题和核心观点！'); return; }
+
+  const title = `精酿圈热议｜${topic}，说点真话`;
+
+  let body = `最近${topic}这个话题讨论度很高，说说我自己的真实看法🍺\n\n`;
+  body += `📌 先说结论：${opinion}\n\n`;
+
+  if (points) {
+    const pts = points.split('\n').filter(l => l.trim());
+    if (pts.length > 0) {
+      body += `🔍 为什么这么觉得：\n`;
+      pts.forEach((p, i) => {
+        body += `${numEmoji(i + 1)} ${p.trim()}\n`;
+      });
+      body += '\n';
+    }
+  }
+
+  if (brands) {
+    body += `🏷️ 文中提到的品牌：${brands}\n\n`;
+  }
+
+  body += `以上纯属个人看法，精酿这个东西本来就很主观，对味了就是好酒。\n\n`;
+  body += `同意的扣1，不同意的评论区说说你的理由👇`;
+
+  const tags = ['#精酿啤酒', '#精酿讨论', '#精酿科普', '#精酿推荐', '#啤酒测评', '#国产精酿', '#微醺日常', '#精酿圈'];
+  const cover = `<h4>📸 封面设计建议</h4>
+<p>【构图】手持啤酒+文字叠加，或者直接用酒瓶+纯色背景<br>
+【大字贴纸】"${topic}？"（加问号制造悬念）<br>
+【小字】说点真话<br>
+【风格】简洁有力，黑/深色背景+白色大字，制造「严肃讨论」的氛围</p>`;
+
+  renderOutput(title, body, tags, cover);
+}
+
+// ===== 探店 =====
+function generateExplore() {
+  const name = val('e-name'), city = val('e-city'), address = val('e-address');
+  const cost = val('e-cost'), time = val('e-time'), style = val('e-style');
+  const beers = val('e-beers'), feeling = val('e-feeling');
+  if (!name || !city || !address || !style || !beers || !feeling) { showToast('请填写所有带 * 的必填项！'); return; }
+
+  const title = `精酿吧探店｜${city}这家${name}，值得专程去一趟`;
+
+  let body = `在${city}发现了一家宝藏精酿吧，必须给你们安利一波🍺\n\n`;
+
+  body += `📍 ${name}\n`;
+  body += `🏠 地址：${address}\n`;
+  if (cost) body += `💰 人均：${cost}\n`;
+  if (time) body += `🕐 推荐时段：${time}\n`;
+  body += `\n`;
+  body += `🏷️ 特色：${style}\n\n`;
+
+  body += `🍺 到店必点：\n`;
+  const beerLines = beers.split('\n').filter(l => l.trim());
+  beerLines.forEach((b, i) => {
+    body += `${numEmoji(i + 1)} ${b.trim()}\n`;
+  });
+  body += '\n';
+
+  body += `📝 真实感受：\n${feeling}\n\n`;
+  body += `你们所在城市有什么宝藏精酿吧？评论区互相安利！👇`;
+
+  const tags = ['#精酿吧探店', '#精酿探店', '#精酿啤酒', '#宝藏酒吧', '#微醺日常', `#${city}探店`, '#精酿推荐', '#城市探索', '#酒吧推荐', '#周末去哪儿'];
+  const cover = `<h4>📸 封面设计建议</h4>
+<p>【构图】酒吧内部环境照 + 酒头特写拼接（双图封面效果更好）<br>
+【大字贴纸】"${city}宝藏精酿吧" 或 "值得专程去"<br>
+【小字】${name} 探店<br>
+【提示】第一张用氛围感最强的环境照，第二张用酒头/酒杯特写。暖色调灯光效果最佳</p>`;
+
+  renderOutput(title, body, tags, cover);
+}
+
+// ===== 渲染 =====
+function renderOutput(title, content, tags, cover) {
+  document.getElementById('output-title').textContent = title;
+  document.getElementById('output-content').textContent = content;
+
+  const tagsContainer = document.getElementById('output-tags');
+  tagsContainer.innerHTML = tags.map(t => `<span class="tag-item">${t}</span>`).join('');
+  document.getElementById('output-tags-raw').textContent = tags.join(' ');
+
+  document.getElementById('output-cover').innerHTML = cover;
+}
+
+function generateStyleTags(style) {
+  const s = style.toLowerCase();
+  const tags = [];
+  if (s.includes('ipa') || s.includes('印度淡色')) tags.push('#IPA');
+  if (s.includes('浑浊') || s.includes('hazy') || s.includes('neipa')) tags.push('#浑浊IPA');
+  if (s.includes('世涛') || s.includes('stout')) tags.push('#世涛');
+  if (s.includes('酸') || s.includes('sour') || s.includes('兰比克') || s.includes('lambic')) tags.push('#酸啤');
+  if (s.includes('小麦') || s.includes('wheat') || s.includes('weiss')) tags.push('#小麦啤');
+  if (s.includes('皮尔森') || s.includes('pilsner')) tags.push('#皮尔森');
+  if (s.includes('波特') || s.includes('porter')) tags.push('#波特');
+  if (s.includes('比利时') || s.includes('belgian')) tags.push('#比利时精酿');
+  if (s.includes('拉格') || s.includes('lager')) tags.push('#拉格');
+  if (s.includes('国产')) tags.push('#国产精酿');
+  return tags.slice(0, 3);
+}
+
+function numEmoji(n) {
+  const emojis = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+  return emojis[n - 1] || `${n}.`;
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+</script>
+
+</body>
+</html>
