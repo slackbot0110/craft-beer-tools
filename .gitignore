@@ -13,3 +13,9 @@
 # 备份文件
 *.bak
 *.backup
+
+# 财务分析临时文件
+fanghua_data.txt
+zhongdacheng_data.txt
+create_dashboard.js
+*.md
