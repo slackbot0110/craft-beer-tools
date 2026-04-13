@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中大城财务分析仪表板 | 财务追踪器</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--card:#1a1d28;--card2:#222636;--border:#2d3148;--green:#00d4aa;--red:#ff4757;--blue:#4facfe;--yellow:#f9ca24;--purple:#a55eea;--text:#e8e8f0;--text2:#8b8da3;--accent:#00d4aa}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1d28 0%,#0d1f2d 50%,#1a2332 100%);border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{color:var(--text2);font-size:13px;margin-top:2px}
+.header .period{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 16px;color:var(--text2);font-size:13px}
+.container{max-width:1400px;margin:0 auto;padding:24px}
+.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:48px;text-align:center;margin-bottom:24px;transition:all .3s;cursor:pointer;background:var(--card)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:#0d2922}
+.upload-zone h3{font-size:18px;margin-bottom:8px;color:var(--text)}
+.upload-zone p{color:var(--text2);font-size:14px}
+.upload-zone .icon{font-size:48px;margin-bottom:16px}
+.file-list{display:flex;gap:12px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.file-tag{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;display:flex;align-items:center;gap:6px}
+.file-tag.fh{border-color:#00d4aa55;color:var(--green)}
+.file-tag.zdc{border-color:#4facfe55;color:var(--blue)}
+.file-tag .x{cursor:pointer;opacity:.6;margin-left:4px}
+.file-tag .x:hover{opacity:1}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.green::before{background:var(--green)}.kpi.red::before{background:var(--red)}.kpi.blue::before{background:var(--blue)}.kpi.yellow::before{background:var(--yellow)}.kpi.purple::before{background:var(--purple)}
+.kpi .label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi .value{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:12px;color:var(--text2);margin-top:4px}
+.kpi .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge.up{background:#00d4aa22;color:var(--green)}.badge.down{background:#ff475722;color:var(--red)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:24px;overflow:hidden}
+.section .title{padding:16px 20px;border-bottom:1px solid var(--border);font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.section .body{padding:20px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border);font-size:12px;text-transform:uppercase;letter-spacing:.3px}
+td{padding:10px 12px;border-bottom:1px solid #1e2235}
+tr:hover td{background:#1e223555}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-family:'SF Mono',Monaco,monospace,sans-serif}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.bar-wrap{height:6px;background:var(--card2);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s}
+.tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--card2);border-radius:8px;padding:3px}
+.tab{padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent}
+.tab.active{background:var(--green);color:#0f1117;font-weight:600}
+.chart-box{height:300px;position:relative}
+.empty{text-align:center;padding:80px 20px;color:var(--text2)}
+.empty .icon{font-size:64px;margin-bottom:16px;opacity:.5}
+.risk{padding:12px 16px;border-radius:8px;margin-bottom:8px;font-size:13px}
+.risk.p0{background:#ff475715;border-left:3px solid var(--red)}.risk.p1{background:#f9ca2415;border-left:3px solid var(--yellow)}.risk.p2{background:#4facfe15;border-left:3px solid var(--blue)}
+.risk .tag{font-size:11px;font-weight:700;margin-right:8px;padding:2px 6px;border-radius:3px}
+.risk .tag.p0{background:#ff475733;color:var(--red)}.risk .tag.p1{background:#f9ca2433;color:var(--yellow)}.risk .tag.p2{background:#4facfe33;color:var(--blue)}
+#results{display:none}
+.company-label{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-left:8px}
+.company-label.fh{background:#00d4aa22;color:var(--green)}.company-label.zdc{background:#4facfe22;color:var(--blue)}.company-label.merged{background:#a55eea22;color:var(--purple)}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.container{padding:12px}}
+</style>
+</head>
+<body>
+<div class="header">
+<div><h1>中大城财务分析仪表板</h1><div class="sub">芳华 + 仲大承 | 自动解析Excel报表</div></div>
+<div class="period" id="periodLabel">等待上传报表...</div>
+</div>
+<div class="container">
+<div class="upload-zone" id="dropZone">
+<div class="icon">📊</div>
+<h3>拖入 Excel 报表文件</h3>
+<p>支持同时上传芳华和仲大承的 .xlsx 文件，自动识别公司和报表类型</p>
+<input type="file" id="fileInput" multiple accept=".xlsx,.xls" style="display:none">
+<div class="file-list" id="fileList"></div>
+</div>
+<div id="results">
+<div class="tabs" id="mainTabs">
+<button class="tab active" onclick="switchView('merged')">合并视角</button>
+<button class="tab" onclick="switchView('fh')">芳华</button>
+<button class="tab" onclick="switchView('zdc')">仲大承</button>
+</div>
+<div id="kpiGrid" class="grid"></div>
+<div class="row">
+<div class="section"><div class="title">📈 收入构成</div><div class="body"><div class="chart-box"><canvas id="revenueChart"></canvas></div></div></div>
+<div class="section"><div class="title">📉 成本构成</div><div class="body"><div class="chart-box"><canvas id="costChart"></canvas></div></div></div>
+</div>
+<div class="row">
+<div class="section"><div class="title">💰 利润瀑布图</div><div class="body"><div class="chart-box"><canvas id="profitChart"></canvas></div></div></div>
+<div class="section"><div class="title">🏦 资产负债结构</div><div class="body"><div class="chart-box"><canvas id="balanceChart"></canvas></div></div></div>
+</div>
+<div class="section"><div class="title">📊 营业收入明细 <span class="company-label" id="revDetailLabel"></span></div><div class="body"><div id="revenueTable"></div></div></div>
+<div class="section"><div class="title">💸 营业成本明细 <span class="company-label" id="costDetailLabel"></span></div><div class="body"><div id="costTable"></div></div></div>
+<div class="section"><div class="title">📋 费用分析</div><div class="body"><div id="expenseTable"></div></div></div>
+<div class="section"><div class="title">💵 现金流分析</div><div class="body"><div id="cashflowTable"></div></div></div>
+<div class="section"><div class="title">⚠️ 风险与建议</div><div class="body"><div id="riskPanel"></div></div></div>
+<div class="section"><div class="title">📄 原始数据浏览</div><div class="body">
+<div class="tabs" id="sheetTabs"></div>
+<div id="rawTable" style="overflow-x:auto;max-height:500px;overflow-y:auto"></div>
+</div></div>
+</div>
+</div>
+<script>
+const D={fh:null,zdc:null};let currentView='merged',charts={};
+const $=id=>document.getElementById(id);
+const fmt=n=>{if(n==null||isNaN(n))return'-';const a=Math.abs(n);if(a>=1e8)return(n/1e8).toFixed(2)+'亿';if(a>=1e4)return(n/1e4).toFixed(2)+'万';return n.toFixed(2)};
+const fmtP=n=>n==null||isNaN(n)?'-':(n*100).toFixed(1)+'%';
+const cls=n=>n>0?'pos':n<0?'neg':'';
+
+// Upload handling
+const dz=$('dropZone'),fi=$('fileInput');
+dz.onclick=()=>fi.click();
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('drag')};
+dz.ondragleave=()=>dz.classList.remove('drag');
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('drag');handleFiles(e.dataTransfer.files)};
+fi.onchange=e=>handleFiles(e.target.files);
+
+function handleFiles(files){
+  Array.from(files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const company=detectCompany(wb);
+      if(company){
+        D[company]={wb,name:f.name,sheets:{}};
+        wb.SheetNames.forEach(n=>{D[company].sheets[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''})});
+        updateFileList();
+        if(D.fh||D.zdc)analyze();
+      }
+    };
+    r.readAsArrayBuffer(f);
+  });
+}
+
+function detectCompany(wb){
+  for(const n of wb.SheetNames){
+    const d=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''});
+    const txt=d.slice(0,5).flat().join('');
+    if(txt.includes('芳华'))return'fh';
+    if(txt.includes('仲大承'))return'zdc';
+  }
+  return null;
+}
+
+function updateFileList(){
+  const fl=$('fileList');
+  fl.innerHTML='';
+  if(D.fh)fl.innerHTML+='<div class="file-tag fh">✅ 芳华: '+D.fh.name+'<span class="x" onclick="removeFile(\'fh\')">✕</span></div>';
+  if(D.zdc)fl.innerHTML+='<div class="file-tag zdc">✅ 仲大承: '+D.zdc.name+'<span class="x" onclick="removeFile(\'zdc\')">✕</span></div>';
+}
+function removeFile(c){D[c]=null;updateFileList();if(!D.fh&&!D.zdc)$('results').style.display='none';}
+
+function findSheet(wb,keywords){
+  if(!wb)return null;
+  for(const n of Object.keys(wb.sheets)){
+    if(keywords.some(k=>n.includes(k)))return wb.sheets[n];
+  }
+  return null;
+}
+
+function parseBS(data){
+  if(!data)return null;
+  const r={};
+  data.forEach(row=>{
+    const k=String(row[0]||'').trim();
+    const v2=parseFloat(row[2])||0;
+    const v3=parseFloat(row[3])||0;
+    const v6=parseFloat(row[6])||0;
+    const v7=parseFloat(row[7])||0;
+    if(k.includes('货币资金')){r.cash=v2;r.cashPrev=v3}
+    if(k.includes('应收账款')&&!k.includes('其他')){r.ar=v2;r.arPrev=v3}
+    if(k.includes('其他应收款')){r.otherAR=v2;r.otherARPrev=v3}
+    if(k==='流动资产合计'){r.currentAsset=v2;r.currentAssetPrev=v3}
+    if(k==='非流动资产合计'){r.ncAsset=v2;r.ncAssetPrev=v3}
+    if(k==='资产总计'){r.totalAsset=v2;r.totalAssetPrev=v3}
+    if(k.includes('预收账款')){r.prepaid=v6;r.prepaidPrev=v7}
+    if(k.includes('应付职工薪酬')){r.payroll=v6;r.payrollPrev=v7}
+    if(k.includes('应交税费')){r.tax=v6;r.taxPrev=v7}
+    if(k.includes('其他应付款')){r.otherAP=v6;r.otherAPPrev=v7}
+    if(k==='负债合计'){r.totalLiab=v6;r.totalLiabPrev=v7}
+    if(k.includes('实收资本')){r.capital=v6}
+    if(k.includes('未分配利润')){r.retained=v6;r.retainedPrev=v7}
+    if(k.includes('所有者权益')&&k.includes('合计')){r.equity=v6;r.equityPrev=v7}
+    if(k.includes('应付账款')&&!k.includes('其他')){r.ap=v6;r.apPrev=v7}
+  });
+  return r;
+}
+
+function parsePL(data){
+  if(!data)return null;
+  const r={revenue_items:[],cost_items:[]};
+  data.forEach(row=>{
+    const k=String(row[0]||'').trim();
+    const v2=parseFloat(row[2])||0;
+    const v3=parseFloat(row[3])||0;
+    if(k.includes('营业收入')){r.revenue=v2;r.revenueM=v3}
+    if(k.includes('营业成本')){r.cost=v2;r.costM=v3}
+    if(k.includes('税金及附加')){r.taxSurcharge=v2}
+    if(k.includes('销售费用')){r.salesExp=v2;r.salesExpM=v3}
+    if(k.includes('管理费用')){r.adminExp=v2;r.adminExpM=v3}
+    if(k.includes('财务费用')){r.finExp=v2;r.finExpM=v3}
+    if(k.includes('营业利润')){r.opProfit=v2;r.opProfitM=v3}
+    if(k.includes('净利润')){r.netProfit=v2;r.netProfitM=v3}
+    if(k.includes('利润总额')){r.totalProfit=v2}
+  });
+  return r;
+}
+
+function parseCF(data){
+  if(!data)return null;
+  const r={};
+  data.forEach(row=>{
+    const k=String(row[0]||'').trim();
+    const v2=parseFloat(row[2])||0;
+    const v3=parseFloat(row[3])||0;
+    if(k.includes('销售产成品')){r.salesCashM=v2;r.salesCash=v3}
+    if(k.includes('收到其他与经营')){r.otherOpCashM=v2;r.otherOpCash=v3}
+    if(k.includes('购买原材料')){r.purchaseCashM=v2;r.purchaseCash=v3}
+    if(k.includes('支付的职工')){r.payrollCashM=v2;r.payrollCash=v3}
+    if(k.includes('支付的税费')){r.taxCashM=v2;r.taxCash=v3}
+    if(k.includes('支付其他与经营')){r.otherOpPayM=v2;r.otherOpPay=v3}
+    if(k.includes('经营活动产生的现金流量净额')&&!k.includes('调节')){r.opCFM=v2;r.opCF=v3}
+    if(k.includes('现金净增加额')){r.netCashM=v2;r.netCash=v3}
+    if(k.includes('期末现金余额')&&!k.includes('等价物')){r.endCashM=v2;r.endCash=v3}
+  });
+  return r;
+}
+
+function parseDetailAccounts(company){
+  if(!D[company])return{rev:[],cost:[]};
+  const sheet=findSheet(D[company],['科目余额']);
+  if(!sheet)return{rev:[],cost:[]};
+  const rev=[],cost=[];
+  sheet.forEach(row=>{
+    const code=String(row[0]||'').trim();
+    const name=String(row[1]||'').trim();
+    const credit=parseFloat(row[7])||parseFloat(row[5])||0;
+    if(code.startsWith('5001')&&code.length===6&&name&&!name.includes('主营业务收入')){
+      rev.push({name:name.replace(/^\s+/,''),amount:credit});
+    }
+    if(code.startsWith('5051')&&code.length===6&&name){
+      rev.push({name:name.replace(/^\s+/,''),amount:credit});
+    }
+    if(code.startsWith('5401')&&code.length===6&&name&&!name.includes('主营业务成本')){
+      cost.push({name:name.replace(/^\s+/,''),amount:credit});
+    }
+  });
+  return{rev,cost};
+}
+
+function analyze(){
+  $('results').style.display='block';
+  // Parse all sheets
+  const parsed={};
+  ['fh','zdc'].forEach(c=>{
+    if(!D[c])return;
+    parsed[c]={
+      bs:parseBS(findSheet(D[c],['资产负债'])),
+      pl:parsePL(findSheet(D[c],['利润表','利润'])),
+      cf:parseCF(findSheet(D[c],['现金流量'])),
+      detail:parseDetailAccounts(c)
+    };
+  });
+  window._parsed=parsed;
+
+  const period=D.fh?String((findSheet(D.fh,['利润表','利润'])||[])[1]||'').split('|')[1]||'':D.zdc?String((findSheet(D.zdc,['利润表','利润'])||[])[1]||'').split('|')[1]||'':'';
+  $('periodLabel').textContent=period||'已加载报表';
+
+  renderAll(parsed);
+  renderSheetTabs();
+}
+
+function switchView(v){
+  currentView=v;
+  document.querySelectorAll('#mainTabs .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('#mainTabs .tab[onclick*="'+v+'"]').classList.add('active');
+  renderAll(window._parsed);
+}
+
+function renderAll(P){
+  renderKPI(P);
+  renderRevenueChart(P);
+  renderCostChart(P);
+  renderProfitChart(P);
+  renderBalanceChart(P);
+  renderRevTable(P);
+  renderCostTable(P);
+  renderExpenseTable(P);
+  renderCashflow(P);
+  renderRisks(P);
+}
+
+function getViewData(P,field){
+  if(currentView==='merged'){
+    const fh=P.fh?P.fh[field]:null;
+    const zdc=P.zdc?P.zdc[field]:null;
+    if(!fh)return zdc;
+    if(!zdc)return fh;
+    const m={};
+    const keys=new Set([...Object.keys(fh),...Object.keys(zdc)]);
+    keys.forEach(k=>{
+      const a=fh[k],b=zdc[k];
+      if(typeof a==='number'&&typeof b==='number')m[k]=a+b;
+      else if(typeof a==='number')m[k]=a;
+      else if(typeof b==='number')m[k]=b;
+      else m[k]=a||b;
+    });
+    return m;
+  }
+  return P[currentView]?P[currentView][field]:null;
+}
+
+function renderKPI(P){
+  const pl=getViewData(P,'pl');
+  const bs=getViewData(P,'bs');
+  const cf=getViewData(P,'cf');
+  if(!pl&&!bs){$('kpiGrid').innerHTML='<div class="kpi"><div class="label">暂无数据</div></div>';return;}
+  const grossMargin=pl&&pl.revenue?(pl.revenue-pl.cost)/pl.revenue:null;
+  const netMargin=pl&&pl.revenue?pl.netProfit/pl.revenue:null;
+  const debtRatio=bs&&bs.totalAsset?bs.totalLiab/bs.totalAsset:null;
+  const currentRatio=bs&&bs.totalLiab?(bs.currentAsset||0)/(bs.totalLiab||1):null;
+  let html='';
+  const kpis=[
+    {label:'营业收入(累计)',value:fmt(pl?.revenue),sub:'当月: '+fmt(pl?.revenueM),cls:'green'},
+    {label:'净利润(累计)',value:fmt(pl?.netProfit),sub:'当月: '+fmt(pl?.netProfitM),cls:pl?.netProfit>=0?'green':'red'},
+    {label:'毛利率',value:fmtP(grossMargin),sub:'成本收入比: '+fmtP(pl&&pl.revenue?pl.cost/pl.revenue:null),cls:grossMargin>0?'green':'red'},
+    {label:'净利率',value:fmtP(netMargin),sub:pl?.netProfit>=0?'盈利':'亏损',cls:netMargin>0?'green':'red'},
+    {label:'货币资金',value:fmt(bs?.cash),sub:'年初: '+fmt(bs?.cashPrev),cls:'blue'},
+    {label:'资产总计',value:fmt(bs?.totalAsset),sub:'年初: '+fmt(bs?.totalAssetPrev),cls:'blue'},
+    {label:'资产负债率',value:fmtP(debtRatio),sub:'负债: '+fmt(bs?.totalLiab),cls:debtRatio>1?'red':'yellow'},
+    {label:'所有者权益',value:fmt(bs?.equity),sub:'未分配利润: '+fmt(bs?.retained),cls:bs?.equity>=0?'green':'red'}
+  ];
+  kpis.forEach(k=>{
+    html+='<div class="kpi '+k.cls+'"><div class="label">'+k.label+'</div><div class="value">'+k.value+'</div><div class="sub">'+k.sub+'</div></div>';
+  });
+  $('kpiGrid').innerHTML=html;
+}
+
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+const COLORS=['#00d4aa','#4facfe','#f9ca24','#a55eea','#ff4757','#fd9644','#26de81','#45aaf2'];
+
+function renderRevenueChart(P){
+  destroyChart('revenueChart');
+  const lbl=(currentView==='merged'?'merged':currentView==='fh'?'fh':'zdc');
+  $('revDetailLabel').className='company-label '+lbl;
+  $('revDetailLabel').textContent=currentView==='merged'?'合并':currentView==='fh'?'芳华':'仲大承';
+  let items=[];
+  if(currentView==='merged'){
+    ['fh','zdc'].forEach(c=>{
+      if(P[c]?.detail)P[c].detail.rev.forEach(i=>items.push({name:(c==='fh'?'[芳华]':'[仲大承]')+i.name,amount:i.amount}));
+    });
+  }else{
+    items=P[currentView]?.detail?.rev||[];
+  }
+  items.sort((a,b)=>b.amount-a.amount);
+  const ctx=$('revenueChart').getContext('2d');
+  charts.revenueChart=new Chart(ctx,{type:'doughnut',data:{
+    labels:items.map(i=>i.name),
+    datasets:[{data:items.map(i=>i.amount),backgroundColor:COLORS,borderWidth:0}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b8da3',font:{size:11},padding:8}}}}});
+}
+
+function renderCostChart(P){
+  destroyChart('costChart');
+  $('costDetailLabel').className='company-label '+(currentView==='merged'?'merged':currentView);
+  $('costDetailLabel').textContent=currentView==='merged'?'合并':currentView==='fh'?'芳华':'仲大承';
+  let items=[];
+  if(currentView==='merged'){
+    ['fh','zdc'].forEach(c=>{
+      if(P[c]?.detail)P[c].detail.cost.forEach(i=>items.push({name:(c==='fh'?'[芳华]':'[仲大承]')+i.name,amount:i.amount}));
+    });
+  }else{
+    items=P[currentView]?.detail?.cost||[];
+  }
+  items.sort((a,b)=>b.amount-a.amount);
+  const ctx=$('costChart').getContext('2d');
+  charts.costChart=new Chart(ctx,{type:'doughnut',data:{
+    labels:items.map(i=>i.name),
+    datasets:[{data:items.map(i=>i.amount),backgroundColor:COLORS.slice().reverse(),borderWidth:0}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b8da3',font:{size:11},padding:8}}}}});
+}
+
+function renderProfitChart(P){
+  destroyChart('profitChart');
+  const pl=getViewData(P,'pl');
+  if(!pl)return;
+  const labels=['营业收入','营业成本','毛利润','税金及附加','销售费用','管理费用','财务费用','净利润'];
+  const gross=pl.revenue-pl.cost;
+  const vals=[pl.revenue,-pl.cost,gross,-(pl.taxSurcharge||0),-(pl.salesExp||0),-(pl.adminExp||0),-(pl.finExp||0),pl.netProfit];
+  const colors=vals.map(v=>v>=0?'#00d4aa':'#ff4757');
+  const ctx=$('profitChart').getContext('2d');
+  charts.profitChart=new Chart(ctx,{type:'bar',data:{
+    labels,datasets:[{data:vals,backgroundColor:colors,borderRadius:4}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+    y:{ticks:{color:'#8b8da3',callback:v=>fmt(v)},grid:{color:'#2d3148'}},x:{ticks:{color:'#8b8da3'},grid:{display:false}}
+  }}});
+}
+
+function renderBalanceChart(P){
+  destroyChart('balanceChart');
+  const bs=getViewData(P,'bs');
+  if(!bs)return;
+  const ctx=$('balanceChart').getContext('2d');
+  charts.balanceChart=new Chart(ctx,{type:'bar',data:{
+    labels:['流动资产','非流动资产','流动负债','所有者权益'],
+    datasets:[
+      {label:'期末',data:[bs.currentAsset||0,bs.ncAsset||0,bs.totalLiab||0,bs.equity||0],backgroundColor:['#00d4aa','#4facfe','#ff4757','#a55eea'],borderRadius:4},
+      {label:'年初',data:[bs.currentAssetPrev||0,bs.ncAssetPrev||0,bs.totalLiabPrev||0,bs.equityPrev||0],backgroundColor:['#00d4aa44','#4facfe44','#ff475744','#a55eea44'],borderRadius:4}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b8da3'}}},scales:{
+    y:{ticks:{color:'#8b8da3',callback:v=>fmt(v)},grid:{color:'#2d3148'}},x:{ticks:{color:'#8b8da3'},grid:{display:false}}
+  }}});
+}
+
+function makeTable(headers,rows){
+  let h='<table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{h+='<tr>'+r.map((c,i)=>{
+    if(i>0&&!isNaN(parseFloat(c)))return'<td class="num '+cls(parseFloat(c))+'">'+fmt(parseFloat(c))+'</td>';
+    return'<td>'+c+'</td>';
+  }).join('')+'</tr>';});
+  h+='</tbody></table>';return h;
+}
+
+function renderRevTable(P){
+  let rows=[];
+  if(currentView==='merged'){
+    ['fh','zdc'].forEach(c=>{if(P[c]?.detail)P[c].detail.rev.forEach(i=>rows.push([(c==='fh'?'芳华':'仲大承'),i.name,i.amount]));});
+  }else{
+    (P[currentView]?.detail?.rev||[]).forEach(i=>rows.push([currentView==='fh'?'芳华':'仲大承',i.name,i.amount]));
+  }
+  rows.sort((a,b)=>b[2]-a[2]);
+  const total=rows.reduce((s,r)=>s+r[2],0);
+  rows=rows.map(r=>[r[0],r[1],r[2],(total?r[2]/total*100:0).toFixed(1)+'%']);
+  $('revenueTable').innerHTML=makeTable(['公司','收入项目','累计金额','占比'],rows);
+}
+
+function renderCostTable(P){
+  let rows=[];
+  if(currentView==='merged'){
+    ['fh','zdc'].forEach(c=>{if(P[c]?.detail)P[c].detail.cost.forEach(i=>rows.push([(c==='fh'?'芳华':'仲大承'),i.name,i.amount]));});
+  }else{
+    (P[currentView]?.detail?.cost||[]).forEach(i=>rows.push([currentView==='fh'?'芳华':'仲大承',i.name,i.amount]));
+  }
+  rows.sort((a,b)=>b[2]-a[2]);
+  const total=rows.reduce((s,r)=>s+r[2],0);
+  rows=rows.map(r=>[r[0],r[1],r[2],(total?r[2]/total*100:0).toFixed(1)+'%']);
+  $('costTable').innerHTML=makeTable(['公司','成本项目','累计金额','占比'],rows);
+}
+
+function renderExpenseTable(P){
+  const rows=[];
+  ['fh','zdc'].forEach(c=>{
+    if(!P[c]?.pl)return;
+    const p=P[c].pl;
+    const name=c==='fh'?'芳华':'仲大承';
+    rows.push([name,'销售费用',p.salesExp||0,p.salesExpM||0]);
+    rows.push([name,'管理费用',p.adminExp||0,p.adminExpM||0]);
+    rows.push([name,'财务费用',p.finExp||0,p.finExpM||0]);
+  });
+  $('expenseTable').innerHTML=makeTable(['公司','费用类别','本年累计','本月金额'],rows);
+}
+
+function renderCashflow(P){
+  const rows=[];
+  ['fh','zdc'].forEach(c=>{
+    if(!P[c]?.cf)return;
+    const cf=P[c].cf;
+    const name=c==='fh'?'芳华':'仲大承';
+    rows.push([name,'经营活动净现金流(累计)',cf.opCF||0,cf.opCFM||0]);
+    rows.push([name,'现金净增加额(累计)',cf.netCash||0,cf.netCashM||0]);
+    rows.push([name,'期末现金余额',cf.endCash||0,'']);
+  });
+  $('cashflowTable').innerHTML=makeTable(['公司','项目','本年累计','本月'],rows);
+}
+
+function renderRisks(P){
+  const risks=[];
+  const fhPL=P.fh?.pl,zdcPL=P.zdc?.pl,fhBS=P.fh?.bs,zdcBS=P.zdc?.bs;
+  // Merged profit check
+  if(fhPL&&zdcPL){
+    const merged=fhPL.netProfit+zdcPL.netProfit;
+    if(merged<0)risks.push({level:'p0',text:'合并净利润为 '+fmt(merged)+'，两家公司合并后实际亏损。芳华盈利 '+fmt(fhPL.netProfit)+' 被仲大承亏损 '+fmt(zdcPL.netProfit)+' 吞噬。'});
+  }
+  if(zdcPL&&zdcPL.revenue&&zdcPL.cost>zdcPL.revenue)
+    risks.push({level:'p0',text:'仲大承营业成本('+fmt(zdcPL.cost)+') > 营业收入('+fmt(zdcPL.revenue)+')，毛利为负，商业模式不可持续。'});
+  if(fhBS&&fhBS.equity<0)risks.push({level:'p0',text:'芳华所有者权益 '+fmt(fhBS.equity)+'，资不抵债。'});
+  if(zdcBS&&zdcBS.equity<0)risks.push({level:'p0',text:'仲大承所有者权益 '+fmt(zdcBS.equity)+'，资不抵债。实收资本为零。'});
+  if(zdcBS&&zdcBS.otherAR>zdcBS.totalAsset*0.8)
+    risks.push({level:'p1',text:'仲大承其他应收款 '+fmt(zdcBS.otherAR)+' 占总资产 '+(zdcBS.otherAR/zdcBS.totalAsset*100).toFixed(0)+'%，关联方资金占用严重。'});
+  if(fhBS&&fhBS.otherAR>fhBS.totalAsset*0.4)
+    risks.push({level:'p1',text:'芳华其他应收款 '+fmt(fhBS.otherAR)+' 占总资产 '+(fhBS.otherAR/fhBS.totalAsset*100).toFixed(0)+'%，含大量关联方往来和押金。'});
+  if(fhPL){
+    const revDetail=P.fh?.detail?.rev||[];
+    const costDetail=P.fh?.detail?.cost||[];
+    const elecRev=revDetail.filter(i=>i.name.includes('电')).reduce((s,i)=>s+i.amount,0);
+    const elecCost=costDetail.filter(i=>i.name.includes('电')).reduce((s,i)=>s+i.amount,0);
+    if(elecCost>elecRev*1.3)risks.push({level:'p1',text:'芳华电费成本('+fmt(elecCost)+') 远超电费收入('+fmt(elecRev)+')，水电费严重倒挂。'});
+  }
+  if(risks.length===0)risks.push({level:'p2',text:'未发现重大财务风险，请继续监控关键指标。'});
+  $('riskPanel').innerHTML=risks.map(r=>'<div class="risk '+r.level+'"><span class="tag '+r.level+'">'+r.level.toUpperCase()+'</span>'+r.text+'</div>').join('');
+}
+
+function renderSheetTabs(){
+  const tabs=[];const allSheets=[];
+  ['fh','zdc'].forEach(c=>{
+    if(!D[c])return;
+    Object.keys(D[c].sheets).forEach(n=>{
+      const label=(c==='fh'?'[芳华]':'[仲大承]')+n;
+      tabs.push({label,key:c+'__'+n});
+      allSheets.push({label,key:c+'__'+n});
+    });
+  });
+  $('sheetTabs').innerHTML=tabs.map((t,i)=>'<button class="tab'+(i===0?' active':'')+'" onclick="showSheet(\''+t.key+'\',this)">'+t.label+'</button>').join('');
+  if(tabs.length)showSheet(tabs[0].key,document.querySelector('#sheetTabs .tab'));
+}
+
+function showSheet(key,el){
+  document.querySelectorAll('#sheetTabs .tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const[c,n]=key.split('__');
+  const data=D[c]?.sheets[n];
+  if(!data){$('rawTable').innerHTML='<p>无数据</p>';return;}
+  let h='<table><tbody>';
+  data.forEach((row,i)=>{
+    if(row.every(c=>c===''))return;
+    h+='<tr>';
+    row.forEach(cell=>{
+      const v=String(cell);
+      h+='<td'+(v&&!isNaN(parseFloat(v))?' class="num"':'')+'>'+(v||'')+'</td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table>';
+  $('rawTable').innerHTML=h;
+}
+</script>
+</body>
+</html>
