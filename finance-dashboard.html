@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>中大城财务分析仪表板 V2 | 多月份对比</title>
+<title>中大城财务分析仪表板 V2.1</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0f1117;--card:#1a1d28;--card2:#222636;--border:#2d3148;--green:#00d4aa;--red:#ff4757;--blue:#4facfe;--yellow:#f9ca24;--purple:#a55eea;--orange:#fd9644;--text:#e8e8f0;--text2:#8b8da3}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
 .header{background:linear-gradient(135deg,#1a1d28,#0d1f2d,#1a2332);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
 .header h1{font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .header .sub{color:var(--text2);font-size:12px;margin-top:2px}
@@ -32,8 +32,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 .ctrl-bar select{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.kpi.green::before{background:var(--green)}.kpi.red::before{background:var(--red)}.kpi.blue::before{background:var(--blue)}.kpi.yellow::before{background:var(--yellow)}.kpi.purple::before{background:var(--purple)}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.green::before{background:var(--green)}.kpi.red::before{background:var(--red)}.kpi.blue::before{background:var(--blue)}.kpi.yellow::before{background:var(--yellow)}.kpi.purple::before{background:var(--purple)}.kpi.orange::before{background:var(--orange)}
 .kpi .label{font-size:11px;color:var(--text2);margin-bottom:2px}
 .kpi .value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
 .kpi .sub{font-size:11px;color:var(--text2);margin-top:3px}
@@ -48,12 +48,12 @@ table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;padding:8px 10px;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border);font-size:11px}
 td{padding:8px 10px;border-bottom:1px solid #1e2235}
 tr:hover td{background:#1e223544}
-.num{text-align:right;font-variant-numeric:tabular-nums;font-family:'SF Mono',Monaco,monospace}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"SF Mono",Monaco,monospace}
 .pos{color:var(--green)}.neg{color:var(--red)}
 .tree-row{cursor:default}.tree-row.parent{cursor:pointer}
 .tree-row.parent:hover td{background:#1e223588}
 .tree-toggle{display:inline-block;width:16px;color:var(--text2);font-size:10px;text-align:center}
-.indent-1{padding-left:28px!important}.indent-2{padding-left:48px!important}
+.indent-1{padding-left:28px!important}.indent-2{padding-left:48px!important}.indent-3{padding-left:68px!important}.indent-4{padding-left:88px!important}
 .tree-child{display:none}.tree-child.open{display:table-row}
 .bar-bg{height:5px;background:var(--card2);border-radius:3px;margin-top:3px;overflow:hidden}
 .bar-fg{height:100%;border-radius:3px}
@@ -62,18 +62,21 @@ tr:hover td{background:#1e223544}
 .tag{font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px;margin-right:6px}
 .tag.p0{background:#ff475733;color:var(--red)}.tag.p1{background:#f9ca2433;color:var(--yellow)}.tag.p2{background:#4facfe33;color:var(--blue)}
 .empty-msg{text-align:center;padding:60px;color:var(--text2);font-size:14px}
+.footer-sig{text-align:center;padding:20px;color:var(--text2);font-size:12px}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}}
 @media(max-width:600px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="header">
-<div><h1>中大城财务分析仪表板</h1><div class="sub">芳华 + 仲大承 | 多月份对比 · 收入成本费用全明细</div></div>
+<div><h1>中大城财务分析仪表板 V2.1</h1><div class="sub">芳华 + 仲大承 | 多月份对比 · 当月期末值 · 全明细</div></div>
 <div id="dataCount" style="color:var(--text2);font-size:12px"></div>
 </div>
 <div class="container">
-<div class="upload-zone" id="dropZone"><p>📊 拖入 Excel 报表（支持多文件多月份），自动识别公司和期间 | 数据保存在本地浏览器中</p>
-<input type="file" id="fileInput" multiple accept=".xlsx,.xls" style="display:none"></div>
+<div class="upload-zone" id="dropZone">
+<p>📊 拖入或点击上传 Excel 报表（支持多文件多月份）| 数据保存在浏览器本地</p>
+<input type="file" id="fileInput" multiple accept=".xlsx,.xls" style="display:none">
+</div>
 <div class="data-mgr" id="dataMgr" style="display:none">
 <div class="title"><span>📁 已加载报表</span><button class="btn danger" onclick="clearAll()">清空全部</button></div>
 <div class="period-grid" id="periodGrid"></div>
@@ -81,359 +84,443 @@ tr:hover td{background:#1e223544}
 <div id="dashboard" style="display:none">
 <div class="ctrl-bar">
 <label>视角:</label>
-<select id="viewMode" onchange="render()"><option value="trend">📈 趋势分析</option><option value="compare">🔀 芳华vs仲大承</option><option value="single">🔍 单月详情</option></select>
+<select id="viewMode" onchange="render()"><option value="trend">📈 趋势分析</option><option value="single">🔍 单月详情</option></select>
 <label style="margin-left:12px">公司:</label>
 <select id="companyFilter" onchange="render()"><option value="merged">合并</option><option value="fh">芳华</option><option value="zdc">仲大承</option></select>
 <label style="margin-left:12px" id="monthLabel">月份:</label>
 <select id="monthFilter" onchange="render()"></select>
 </div>
-<div id="kpiGrid" class="grid"></div>
+<div style="color:var(--text2);font-size:12px;margin-bottom:10px;padding-left:2px">📌 数据来源：资产负债表和利润表</div><div id="kpiGrid" class="grid"></div>
 <div id="chartArea"></div>
 <div id="tableArea"></div>
 <div id="riskArea"></div>
 </div>
 </div>
 <script>
-const STORE_KEY='zdcFinV2';let store=loadStore();let charts={};
-const $=id=>document.getElementById(id);
-const fmt=n=>{if(n==null||isNaN(n))return'-';const a=Math.abs(n);if(a>=1e8)return(n/1e8).toFixed(2)+'亿';if(a>=1e4)return(n/1e4).toFixed(2)+'万';return n.toFixed(2)};
-const fmtP=n=>n==null||isNaN(n)?'-':(n*100).toFixed(1)+'%';
-const cls=n=>n>0?'pos':n<0?'neg':'';
-const COLORS=['#00d4aa','#4facfe','#f9ca24','#a55eea','#ff4757','#fd9644','#26de81','#45aaf2','#fc5c65','#778ca3'];
+var STORE_KEY="zdcFinV2";
+var store=loadStore();
+var charts={};
+function EL(id){return document.getElementById(id)}
+function fmt(n){if(n==null||isNaN(n))return"-";var a=Math.abs(n);if(a>=1e8)return(n/1e8).toFixed(2)+"亿";if(a>=1e4)return(n/1e4).toFixed(2)+"万";return n.toFixed(2)}
+function fmtP(n){return(n==null||isNaN(n))?"-":(n*100).toFixed(1)+"%"}
+function cls(n){return n>0?"pos":n<0?"neg":""}
 
 function loadStore(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{}}catch(e){return{}}}
 function saveStore(){localStorage.setItem(STORE_KEY,JSON.stringify(store))}
-function getKey(c,p){return c+'_'+p}
-function getSortedPeriods(){const s=new Set();Object.keys(store).forEach(k=>{s.add(k.split('_').slice(1).join('_'))});return[...s].sort()}
+function getKey(c,p){return c+"_"+p}
+function getSortedPeriods(){var s={};Object.keys(store).forEach(function(k){var p=k.split("_").slice(1).join("_");s[p]=1});return Object.keys(s).sort()}
 
-const dz=$('dropZone'),fi=$('fileInput');
-dz.onclick=()=>fi.click();
-dz.ondragover=e=>{e.preventDefault();dz.classList.add('drag')};
-dz.ondragleave=()=>dz.classList.remove('drag');
-dz.ondrop=e=>{e.preventDefault();dz.classList.remove('drag');handleFiles(e.dataTransfer.files)};
-fi.onchange=e=>{handleFiles(e.target.files);fi.value=''};
+var dz=EL("dropZone"),fi=EL("fileInput");
+dz.addEventListener("click",function(){fi.click()});
+dz.addEventListener("dragover",function(e){e.preventDefault();dz.classList.add("drag")});
+dz.addEventListener("dragleave",function(){dz.classList.remove("drag")});
+dz.addEventListener("drop",function(e){e.preventDefault();dz.classList.remove("drag");handleFiles(e.dataTransfer.files)});
+fi.addEventListener("change",function(e){handleFiles(e.target.files);fi.value=""});
 
-function handleFiles(files){let n=0;Array.from(files).forEach(f=>{const r=new FileReader();r.onload=e=>{
-  const wb=XLSX.read(e.target.result,{type:'array'});const info=detectInfo(wb);
-  if(info.company&&info.period){store[getKey(info.company,info.period)]={company:info.company,period:info.period,parsed:parseWB(wb),name:f.name};n++}
-  if(n>0){saveStore();refreshUI()}};r.readAsArrayBuffer(f)})}
+function handleFiles(files){
+  var count=0;
+  for(var i=0;i<files.length;i++){
+    (function(f){
+      var r=new FileReader();
+      r.onload=function(e){
+        var wb=XLSX.read(e.target.result,{type:"array"});
+        var info=detectInfo(wb);
+        if(info.company&&info.period){
+          store[getKey(info.company,info.period)]={company:info.company,period:info.period,parsed:parseWB(wb),name:f.name};
+          count++;
+        }
+        if(count>0){saveStore();refreshUI()}
+      };
+      r.readAsArrayBuffer(f);
+    })(files[i]);
+  }
+}
 
-function detectInfo(wb){let co=null,pe=null;
-  for(const n of wb.SheetNames){const d=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''});
-    for(let i=0;i<Math.min(d.length,5);i++){const t=d[i].join('');
-      if(!co){if(t.includes('芳华'))co='fh';else if(t.includes('仲大承'))co='zdc'}
-      if(!pe){const m=t.match(/(20\d{2})年(?:第)?(\d{1,2})期/)||t.match(/(20\d{2})\.(\d{2})/);if(m)pe=m[1]+'.'+m[2].padStart(2,'0')}
-    }};return{company:co,period:pe}}
+function detectInfo(wb){
+  var co=null,pe=null;
+  for(var ni=0;ni<wb.SheetNames.length;ni++){
+    var d=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[ni]],{header:1,defval:""});
+    for(var i=0;i<Math.min(d.length,5);i++){
+      var t=d[i].join("");
+      if(!co){if(t.indexOf("芳华")>=0)co="fh";else if(t.indexOf("仲大承")>=0)co="zdc"}
+      if(!pe){var m=t.match(/(20\d{2})年(?:第)?(\d{1,2})期/)||t.match(/(20\d{2})\.(\d{2})/);if(m)pe=m[1]+"."+("0"+m[2]).slice(-2)}
+    }
+  }
+  return{company:co,period:pe};
+}
 
 function parseWB(wb){
-  const sheets={};wb.SheetNames.forEach(n=>{sheets[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''})});
-  const find=kw=>{for(const n of Object.keys(sheets)){if(kw.some(k=>n.includes(k)))return sheets[n]}return null};
-  return{bs:parseBS(find(['资产负债'])),pl:parsePL(find(['利润表','利润'])),cf:parseCF(find(['现金流量'])),detail:parseAllDetail(find(['科目余额'])),sheets}}
+  var sheets={};
+  wb.SheetNames.forEach(function(n){sheets[n]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:""})});
+  function find(kw){for(var n in sheets){for(var i=0;i<kw.length;i++){if(n.indexOf(kw[i])>=0)return sheets[n]}}return null}
+  return{bs:parseBS(find(["资产负债"])),pl:parsePL(find(["利润表","利润"])),cf:parseCF(find(["现金流量"])),detail:parseAllDetail(find(["科目余额"])),sheets:sheets};
+}
 
-function parseBS(d){if(!d)return{};const r={};d.forEach(row=>{const k=(row[0]||'').toString().trim(),v=i=>parseFloat(row[i])||0;
-  if(k.includes('货币资金')){r.cash=v(2);r.cashPrev=v(3)}if(k.includes('应收账款')&&!k.includes('其他')){r.ar=v(2)}if(k.includes('其他应收款')){r.otherAR=v(2)}
-  if(k==='流动资产合计'){r.currentAsset=v(2);r.currentAssetPrev=v(3)}if(k==='资产总计'){r.totalAsset=v(2);r.totalAssetPrev=v(3)}
-  if(k.includes('预收账款')){r.prepaid=v(6)}if(k.includes('其他应付款')){r.otherAP=v(6)}if(k==='负债合计'){r.totalLiab=v(6);r.totalLiabPrev=v(7)}
-  if(k.includes('未分配利润')){r.retained=v(6)}if(k.includes('所有者权益')&&k.includes('合计')){r.equity=v(6);r.equityPrev=v(7)}
-  if(k.includes('非流动资产合计')){r.ncAsset=v(2)}});return r}
+function pf(v){return parseFloat(v)||0}
 
-function parsePL(d){if(!d)return{};const r={};d.forEach(row=>{const k=(row[0]||'').toString().trim(),v2=parseFloat(row[2])||0,v3=parseFloat(row[3])||0;
-  if(k.includes('营业收入')){r.revenue=v2;r.revenueM=v3}if(k.includes('营业成本')){r.cost=v2;r.costM=v3}
-  if(k.includes('税金及附加')){r.taxSur=v2}if(k.includes('销售费用')){r.salesExp=v2;r.salesExpM=v3}
-  if(k.includes('管理费用')){r.adminExp=v2;r.adminExpM=v3}if(k.includes('财务费用')){r.finExp=v2;r.finExpM=v3}
-  if(k.includes('营业利润')){r.opProfit=v2;r.opProfitM=v3}if(k.includes('净利润')){r.netProfit=v2;r.netProfitM=v3}});return r}
+function parseBS(d){
+  if(!d)return{};var r={};
+  d.forEach(function(row){
+    var k=(row[0]||"").toString().trim();
+    if(k.indexOf("货币资金")>=0){r.cash=pf(row[2]);r.cashPrev=pf(row[3])}
+    if(k.indexOf("应收账款")>=0&&k.indexOf("其他")<0){r.arOnly=pf(row[2]);r.arOnlyPrev=pf(row[3])}
+    if(k.indexOf("其他应收款")>=0){r.otherAR=pf(row[2]);r.otherARPrev=pf(row[3])}
+    if(k==="流动资产合计"){r.currentAsset=pf(row[2]);r.currentAssetPrev=pf(row[3])}
+    if(k==="资产总计"){r.totalAsset=pf(row[2]);r.totalAssetPrev=pf(row[3])}
+    if(k.indexOf("应付账款")>=0&&k.indexOf("其他")<0){r.apOnly=pf(row[6]);r.apOnlyPrev=pf(row[7])}
+    if(k.indexOf("预收账款")>=0){r.prepaid=pf(row[6])}
+    if(k.indexOf("其他应付款")>=0){r.otherAP=pf(row[6]);r.otherAPPrev=pf(row[7])}
+    if(k==="负债合计"){r.totalLiab=pf(row[6]);r.totalLiabPrev=pf(row[7])}
+    if(k.indexOf("未分配利润")>=0){r.retained=pf(row[6])}
+    if(k.indexOf("所有者权益")>=0&&k.indexOf("合计")>=0){r.equity=pf(row[6]);r.equityPrev=pf(row[7])}
+    if(k.indexOf("非流动资产合计")>=0){r.ncAsset=pf(row[2])}
+  });
+  r.ar=(r.arOnly||0)+(r.otherAR||0);
+  r.arPrev=(r.arOnlyPrev||0)+(r.otherARPrev||0);
+  r.ap=(r.apOnly||0)+(r.otherAP||0);
+  r.apPrev=(r.apOnlyPrev||0)+(r.otherAPPrev||0);
+  return r;
+}
 
-function parseCF(d){if(!d)return{};const r={};d.forEach(row=>{const k=(row[0]||'').toString().trim(),v2=parseFloat(row[2])||0,v3=parseFloat(row[3])||0;
-  if(k.includes('经营活动产生的现金流量净额')&&!k.includes('调节')){r.opCFM=v2;r.opCF=v3}
-  if(k.includes('现金净增加额')){r.netCashM=v2;r.netCash=v3}
-  if(k.includes('期末现金余额')&&!k.includes('等价物')){r.endCash=v3||v2}});return r}
+function parsePL(d){
+  if(!d)return{};var r={};
+  d.forEach(function(row){
+    var k=(row[0]||"").toString().trim(),v2=pf(row[2]),v3=pf(row[3]);
+    if(k.indexOf("营业收入")>=0){r.revenue=v2;r.revenueM=v3}
+    if(k.indexOf("营业成本")>=0){r.cost=v2;r.costM=v3}
+    if(k.indexOf("税金及附加")>=0){r.taxSur=v2;r.taxSurM=v3}
+    if(k.indexOf("销售费用")>=0){r.salesExp=v2;r.salesExpM=v3}
+    if(k.indexOf("管理费用")>=0){r.adminExp=v2;r.adminExpM=v3}
+    if(k.indexOf("财务费用")>=0){r.finExp=v2;r.finExpM=v3}
+    if(k.indexOf("营业利润")>=0){r.opProfit=v2;r.opProfitM=v3}
+    if(k.indexOf("净利润")>=0){r.netProfit=v2;r.netProfitM=v3}
+  });
+  return r;
+}
 
-// NEW: Parse ALL detail with hierarchy
+function parseCF(d){
+  if(!d)return{};var r={};
+  d.forEach(function(row){
+    var k=(row[0]||"").toString().trim(),v2=pf(row[2]),v3=pf(row[3]);
+    if(k.indexOf("经营活动产生的现金流量净额")>=0&&k.indexOf("调节")<0){r.opCFM=v2;r.opCF=v3}
+    if(k.indexOf("现金净增加额")>=0){r.netCashM=v2;r.netCash=v3}
+    if(k.indexOf("期末现金余额")>=0&&k.indexOf("等价物")<0){r.endCash=v3||v2}
+  });
+  return r;
+}
+
 function parseAllDetail(d){
-  if(!d)return{revenue:[],cost:[],salesExp:[],adminExp:[],finExp:[]};
-  const cats={revenue:{prefixes:['5001','5051'],items:[]},cost:{prefixes:['5401'],items:[]},
-    salesExp:{prefixes:['5601'],items:[]},adminExp:{prefixes:['5602'],items:[]},finExp:{prefixes:['5603'],items:[]}};
-  d.forEach(row=>{
-    const code=(row[0]||'').toString().trim();
-    const name=(row[1]||'').toString().trim();
+  var empty={revenue:[],cost:[],salesExp:[],adminExp:[],finExp:[],arDetail:[],apDetail:[]};
+  if(!d)return empty;
+  var cats={
+    revenue:{prefixes:["5001","5051"],items:[]},
+    cost:{prefixes:["5401"],items:[]},
+    salesExp:{prefixes:["5601"],items:[]},
+    adminExp:{prefixes:["5602"],items:[]},
+    finExp:{prefixes:["5603"],items:[]},
+    arDetail:{prefixes:["1122","1221"],items:[]},
+    apDetail:{prefixes:["2202","2241"],items:[]}
+  };
+  var colCount=d.length>0?d[0].length:0;
+  var hasEndBal=colCount>=10;
+  d.forEach(function(row){
+    var code=(row[0]||"").toString().trim();
+    var name=(row[1]||"").toString().trim();
     if(!code||!name)return;
-    // Get YTD amount: for income/cost items, credit column (index 7) for cumulative
-    // Try columns 6(YTD debit),7(YTD credit) - for revenue/cost the credit side is the amount
-    const ytdCredit=parseFloat(row[7])||0;
-    const ytdDebit=parseFloat(row[6])||0;
-    const monthDebit=parseFloat(row[4])||0;
-    const monthCredit=parseFloat(row[5])||0;
-    for(const[catKey,cat] of Object.entries(cats)){
-      for(const prefix of cat.prefixes){
-        if(!code.startsWith(prefix))continue;
-        // Skip the top-level summary row (e.g., 5001, 5401, 5601)
-        if(code===prefix)continue;
-        // Determine level
-        const baseCode=code.split('_')[0];
-        const hasUnderscore=code.includes('_');
-        let level=1;
-        if(hasUnderscore){
-          const parts=code.split('_');
-          level=parts.length;
-        }
-        // Amount: revenue/cost use credit; expenses also use credit (since debit=credit in balance table for P&L items)
-        const amount=ytdCredit||ytdDebit;
-        const monthAmt=monthCredit||monthDebit;
+    var ytdDebit=pf(row[6]),ytdCredit=pf(row[7]);
+    var monthDebit=pf(row[4]),monthCredit=pf(row[5]);
+    var endDebit=hasEndBal?pf(row[8]):0;
+    var endCredit=hasEndBal?pf(row[9]):0;
+    for(var catKey in cats){
+      var cat=cats[catKey];
+      for(var pi=0;pi<cat.prefixes.length;pi++){
+        var prefix=cat.prefixes[pi];
+        if(code.indexOf(prefix)!==0||code===prefix)continue;
+        var hasUS=code.indexOf("_")>=0;
+        var level=1;if(hasUS)level=code.split("_").length;
+        var isBSItem=(catKey==="arDetail"||catKey==="apDetail");
+        var amount,monthAmt;
+        if(isBSItem){amount=hasEndBal?(endDebit||endCredit):(ytdCredit||ytdDebit);monthAmt=monthDebit||monthCredit}
+        else{amount=ytdCredit||ytdDebit;monthAmt=monthCredit||monthDebit}
         if(amount===0&&monthAmt===0)continue;
-        // Only add leaf or mid-level, skip if it's the exact prefix
-        const isSubItem=hasUnderscore;
-        const parentCode=isSubItem?code.substring(0,code.lastIndexOf('_')):prefix;
-        cat.items.push({code,name:name.replace(/^\s+/,''),amount,monthAmt,level,parentCode,isSubItem});
+        cat.items.push({code:code,name:name.replace(/^\s+/,""),amount:amount,monthAmt:monthAmt,level:level,isSubItem:hasUS});
       }
     }
   });
-  // Build tree structure
-  const buildTree=items=>{
-    // Separate parents (6-digit codes without underscore) and children (with underscore)
-    const parents=items.filter(i=>!i.isSubItem);
-    const children=items.filter(i=>i.isSubItem);
-    return parents.map(p=>{
-      const kids=children.filter(c=>c.code.startsWith(p.code+'_')&&c.level===2);
-      // If parent has sub-items, get grandchildren too
-      const kidsWithGrand=kids.map(k=>{
-        const grands=children.filter(c=>c.code.startsWith(k.code+'_')&&c.level>k.level);
-        return{...k,children:grands};
+  function buildTree(items){
+    var topLevel=items.filter(function(i){return !i.isSubItem});
+    var subItems=items.filter(function(i){return i.isSubItem});
+    function attachChildren(parent,allSubs){
+      var directKids=allSubs.filter(function(c){
+        if(c.code.indexOf(parent.code+"_")!==0)return false;
+        var rem=c.code.substring(parent.code.length+1);
+        return rem.indexOf("_")<0;
       });
-      return{...p,children:kidsWithGrand};
-    }).sort((a,b)=>b.amount-a.amount);
-  };
-  return{
-    revenue:buildTree(cats.revenue.items),
-    cost:buildTree(cats.cost.items),
-    salesExp:buildTree(cats.salesExp.items),
-    adminExp:buildTree(cats.adminExp.items),
-    finExp:buildTree(cats.finExp.items)
-  };
+      return directKids.map(function(k){
+        var copy={code:k.code,name:k.name,amount:k.amount,monthAmt:k.monthAmt,level:k.level,isSubItem:k.isSubItem};
+        copy.children=attachChildren(k,allSubs);
+        return copy;
+      }).sort(function(a,b){return b.amount-a.amount});
+    }
+    return topLevel.map(function(p){
+      var copy={code:p.code,name:p.name,amount:p.amount,monthAmt:p.monthAmt,level:p.level,isSubItem:p.isSubItem};
+      copy.children=attachChildren(p,subItems);
+      return copy;
+    }).sort(function(a,b){return b.amount-a.amount});
+  }
+  var result={};
+  for(var k in cats){result[k]=buildTree(cats[k].items)}
+  return result;
 }
 
 function clearAll(){store={};saveStore();refreshUI()}
 function removeEntry(k){delete store[k];saveStore();refreshUI()}
 
 function refreshUI(){
-  const keys=Object.keys(store);
-  $('dataCount').textContent=keys.length?keys.length+'份报表':'';
-  $('dataMgr').style.display=keys.length?'block':'none';
-  $('dashboard').style.display=keys.length?'block':'none';
-  $('periodGrid').innerHTML=keys.sort().map(k=>{const d=store[k];
-    return'<div class="period-card"><span class="co '+(d.company==='fh'?'fh':'zdc')+'">'+(d.company==='fh'?'芳华':'仲大承')+'</span><span>'+d.period+'</span><span class="x" onclick="removeEntry(\''+k+'\')">✕</span></div>'}).join('');
-  const ps=getSortedPeriods(),mf=$('monthFilter'),cv=mf.value;
-  mf.innerHTML=ps.map(p=>'<option value="'+p+'">'+p+'</option>').join('');
-  if(cv&&ps.includes(cv))mf.value=cv;else if(ps.length)mf.value=ps[ps.length-1];
+  var keys=Object.keys(store);
+  EL("dataCount").textContent=keys.length?keys.length+"份报表":"";
+  EL("dataMgr").style.display=keys.length?"block":"none";
+  EL("dashboard").style.display=keys.length?"block":"none";
+  var html="";
+  keys.sort().forEach(function(k){
+    var d=store[k];
+    html+="<div class=\"period-card\"><span class=\"co "+(d.company==="fh"?"fh":"zdc")+"\">"+(d.company==="fh"?"芳华":"仲大承")+"</span><span>"+d.period+"</span><span class=\"x\" onclick=\"removeEntry(\x27"+k+"\x27)\">✕</span></div>";
+  });
+  EL("periodGrid").innerHTML=html;
+  var ps=getSortedPeriods(),mf=EL("monthFilter"),cv=mf.value;
+  var mhtml="";ps.forEach(function(p){mhtml+="<option value=\""+p+"\">"+p+"</option>"});
+  mf.innerHTML=mhtml;
+  if(cv&&ps.indexOf(cv)>=0)mf.value=cv;else if(ps.length)mf.value=ps[ps.length-1];
   if(keys.length)render();
 }
 
-function getData(c,p){return store[getKey(c,p)]?.parsed||null}
-function mergeData(p){const a=getData('fh',p),b=getData('zdc',p);if(!a)return b;if(!b)return a;
-  const m=(x,y)=>{if(!x)return y;if(!y)return x;const r={};new Set([...Object.keys(x),...Object.keys(y)]).forEach(k=>{
-    const a=x[k],b=y[k];r[k]=typeof a==='number'&&typeof b==='number'?a+b:(typeof a==='number'?a:b)});return r};
-  return{bs:m(a.bs,b.bs),pl:m(a.pl,b.pl),cf:m(a.cf,b.cf),detail:a.detail}}
+function getData(c,p){var k=getKey(c,p);return store[k]?store[k].parsed:null}
 
-function destroyCharts(){Object.values(charts).forEach(c=>c.destroy());charts={}}
-function mkChart(id,type,labels,datasets,opts={}){
-  const ctx=document.getElementById(id)?.getContext('2d');if(!ctx)return;
-  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#8b8da3',font:{size:11}}}},
-    scales:{y:{ticks:{color:'#8b8da3',callback:v=>fmt(v)},grid:{color:'#2d3148'}},x:{ticks:{color:'#8b8da3'},grid:{display:false}}},...opts}})}
+function mergeData(p){
+  var a=getData("fh",p),b=getData("zdc",p);
+  if(!a)return b;if(!b)return a;
+  function m(x,y){
+    if(!x)return y;if(!y)return x;
+    var r={};var allKeys={};
+    Object.keys(x).forEach(function(k){allKeys[k]=1});
+    Object.keys(y).forEach(function(k){allKeys[k]=1});
+    Object.keys(allKeys).forEach(function(k){
+      var av=x[k],bv=y[k];
+      if(typeof av==="number"&&typeof bv==="number")r[k]=av+bv;
+      else if(typeof av==="number")r[k]=av;
+      else if(typeof bv==="number")r[k]=bv;
+      else r[k]=av||bv;
+    });
+    return r;
+  }
+  function mergeDetail(x,y){
+    if(!x)return y;if(!y)return x;
+    var r={};var allKeys={};
+    Object.keys(x).forEach(function(k){allKeys[k]=1});
+    Object.keys(y).forEach(function(k){allKeys[k]=1});
+    Object.keys(allKeys).forEach(function(k){
+      if(Array.isArray(x[k])&&Array.isArray(y[k]))r[k]=x[k].concat(y[k]);
+      else r[k]=x[k]||y[k];
+    });
+    return r;
+  }
+  return{bs:m(a.bs,b.bs),pl:m(a.pl,b.pl),cf:m(a.cf,b.cf),detail:mergeDetail(a.detail,b.detail)};
+}
+
+function destroyCharts(){for(var k in charts){charts[k].destroy()}charts={}}
+function mkChart(id,type,labels,datasets,opts){
+  var el=document.getElementById(id);if(!el)return;
+  var baseOpts={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:"#8b8da3",font:{size:11}}}},
+    scales:{y:{ticks:{color:"#8b8da3",callback:function(v){return fmt(v)}},grid:{color:"#2d3148"}},x:{ticks:{color:"#8b8da3"},grid:{display:false}}}};
+  if(opts){for(var ok in opts){if(ok==="scales"){for(var sk in opts.scales){baseOpts.scales[sk]=opts.scales[sk]}}else if(ok==="plugins"){for(var pk in opts.plugins){baseOpts.plugins[pk]=opts.plugins[pk]}}else{baseOpts[ok]=opts[ok]}}}
+  charts[id]=new Chart(el.getContext("2d"),{type:type,data:{labels:labels,datasets:datasets},options:baseOpts});
+}
 
 function render(){
-  destroyCharts();const v=$('viewMode').value;
-  $('monthLabel').style.display=v==='trend'?'none':'inline';
-  $('monthFilter').style.display=v==='trend'?'none':'inline-block';
-  if(v==='trend')renderTrend();else if(v==='compare')renderCompare();else renderSingle();
+  destroyCharts();
+  var v=EL("viewMode").value;
+  EL("monthLabel").style.display=v==="trend"?"none":"inline";
+  EL("monthFilter").style.display=v==="trend"?"none":"inline-block";
+  if(v==="trend")renderTrend();else renderSingle();
 }
 
 function renderTrend(){
-  const ps=getSortedPeriods(),cf=$('companyFilter').value;
-  const series=ps.map(p=>{const d=cf==='merged'?mergeData(p):getData(cf,p);return d?{period:p,...d}:null}).filter(Boolean);
-  if(!series.length){$('kpiGrid').innerHTML='';$('chartArea').innerHTML='<div class="empty-msg">暂无数据</div>';$('tableArea').innerHTML='';$('riskArea').innerHTML='';return}
-  const L=series[series.length-1],P=series.length>1?series[series.length-2]:null;
-  renderKPI(L.pl,L.bs,P?.pl,P?.bs);
-  const labels=series.map(s=>s.period);
-  let ch='<div class="row2">';
-  ch+='<div class="section"><div class="stitle">📈 收入与利润趋势</div><div class="body"><div class="chart-box"><canvas id="c1"></canvas></div></div></div>';
-  ch+='<div class="section"><div class="stitle">💰 现金与资产趋势</div><div class="body"><div class="chart-box"><canvas id="c2"></canvas></div></div></div></div>';
-  ch+='<div class="row2">';
-  ch+='<div class="section"><div class="stitle">📊 利润率趋势</div><div class="body"><div class="chart-box"><canvas id="c3"></canvas></div></div></div>';
-  ch+='<div class="section"><div class="stitle">🏦 负债与权益</div><div class="body"><div class="chart-box"><canvas id="c4"></canvas></div></div></div></div>';
-  $('chartArea').innerHTML=ch;
-  mkChart('c1','line',labels,[
-    {label:'营业收入',data:series.map(s=>s.pl?.revenue||0),borderColor:'#00d4aa',fill:false,tension:.3},
-    {label:'营业成本',data:series.map(s=>s.pl?.cost||0),borderColor:'#ff4757',fill:false,tension:.3},
-    {label:'净利润',data:series.map(s=>s.pl?.netProfit||0),borderColor:'#4facfe',fill:false,tension:.3}]);
-  mkChart('c2','line',labels,[
-    {label:'货币资金',data:series.map(s=>s.bs?.cash||0),borderColor:'#00d4aa',tension:.3},
-    {label:'总资产',data:series.map(s=>s.bs?.totalAsset||0),borderColor:'#4facfe',tension:.3}]);
-  mkChart('c3','line',labels,[
-    {label:'毛利率',data:series.map(s=>s.pl?.revenue?(s.pl.revenue-s.pl.cost)/s.pl.revenue:0),borderColor:'#00d4aa',tension:.3},
-    {label:'净利率',data:series.map(s=>s.pl?.revenue?s.pl.netProfit/s.pl.revenue:0),borderColor:'#a55eea',tension:.3}],
-    {scales:{y:{ticks:{color:'#8b8da3',callback:v=>fmtP(v)},grid:{color:'#2d3148'}},x:{ticks:{color:'#8b8da3'},grid:{display:false}}}});
-  mkChart('c4','bar',labels,[
-    {label:'负债',data:series.map(s=>s.bs?.totalLiab||0),backgroundColor:'#ff475766',borderRadius:4},
-    {label:'权益',data:series.map(s=>s.bs?.equity||0),backgroundColor:'#a55eea66',borderRadius:4}]);
-  // Trend table
-  let tb='<div class="section"><div class="stitle">📋 多月份汇总</div><div class="body" style="overflow-x:auto"><table><thead><tr><th>指标</th>';
-  series.forEach(s=>{tb+='<th class="num">'+s.period+'</th>'});tb+='</tr></thead><tbody>';
-  [['营业收入',s=>s.pl?.revenue],['营业成本',s=>s.pl?.cost],['毛利润',s=>(s.pl?.revenue||0)-(s.pl?.cost||0)],
-    ['销售费用',s=>s.pl?.salesExp],['管理费用',s=>s.pl?.adminExp],['财务费用',s=>s.pl?.finExp],['净利润',s=>s.pl?.netProfit],
-    ['货币资金',s=>s.bs?.cash],['总资产',s=>s.bs?.totalAsset],['负债合计',s=>s.bs?.totalLiab],['所有者权益',s=>s.bs?.equity]
-  ].forEach(([n,fn])=>{tb+='<tr><td>'+n+'</td>';series.forEach(s=>{const v=fn(s);tb+='<td class="num '+cls(v)+'">'+fmt(v)+'</td>'});tb+='</tr>'});
-  tb+='</tbody></table></div></div>';
-  $('tableArea').innerHTML=tb;
+  var ps=getSortedPeriods(),cf=EL("companyFilter").value;
+  var series=[];
+  ps.forEach(function(p){
+    var d=cf==="merged"?mergeData(p):getData(cf,p);
+    if(d)series.push({period:p,pl:d.pl||{},bs:d.bs||{},cf:d.cf||{}});
+  });
+  if(!series.length){EL("kpiGrid").innerHTML="";EL("chartArea").innerHTML="<div class=\"empty-msg\">暂无数据</div>";EL("tableArea").innerHTML="";EL("riskArea").innerHTML="";return}
+  var L=series[series.length-1],P=series.length>1?series[series.length-2]:null;
+  renderKPI(L.pl,L.bs,P?P.pl:null,P?P.bs:null);
+  var labels=series.map(function(s){return s.period});
+  var ch="<div class=\"row2\">";
+  ch+="<div class=\"section\"><div class=\"stitle\">📈 收入与利润趋势（当月值）</div><div class=\"body\"><div class=\"chart-box\"><canvas id=\"c1\"></canvas></div></div></div>";
+  ch+="<div class=\"section\"><div class=\"stitle\">💰 现金与资产趋势（期末值）</div><div class=\"body\"><div class=\"chart-box\"><canvas id=\"c2\"></canvas></div></div></div></div>";
+  ch+="<div class=\"row2\">";
+  ch+="<div class=\"section\"><div class=\"stitle\">📊 利润率趋势（当月值）</div><div class=\"body\"><div class=\"chart-box\"><canvas id=\"c3\"></canvas></div></div></div>";
+  ch+="<div class=\"section\"><div class=\"stitle\">🏦 负债与权益（期末值）</div><div class=\"body\"><div class=\"chart-box\"><canvas id=\"c4\"></canvas></div></div></div></div>";
+  EL("chartArea").innerHTML=ch;
+  mkChart("c1","line",labels,[
+    {label:"营业收入(当月)",data:series.map(function(s){return s.pl.revenueM||0}),borderColor:"#00d4aa",fill:false,tension:.3},
+    {label:"营业成本(当月)",data:series.map(function(s){return s.pl.costM||0}),borderColor:"#ff4757",fill:false,tension:.3},
+    {label:"净利润(当月)",data:series.map(function(s){return s.pl.netProfitM||0}),borderColor:"#4facfe",fill:false,tension:.3}]);
+  mkChart("c2","line",labels,[
+    {label:"货币资金",data:series.map(function(s){return s.bs.cash||0}),borderColor:"#00d4aa",tension:.3},
+    {label:"总资产",data:series.map(function(s){return s.bs.totalAsset||0}),borderColor:"#4facfe",tension:.3}]);
+  mkChart("c3","line",labels,[
+    {label:"毛利率(当月)",data:series.map(function(s){return s.pl.revenueM?(s.pl.revenueM-(s.pl.costM||0))/s.pl.revenueM:0}),borderColor:"#00d4aa",tension:.3},
+    {label:"净利率(当月)",data:series.map(function(s){return s.pl.revenueM?(s.pl.netProfitM||0)/s.pl.revenueM:0}),borderColor:"#a55eea",tension:.3}],
+    {scales:{y:{ticks:{color:"#8b8da3",callback:function(v){return fmtP(v)}},grid:{color:"#2d3148"}},x:{ticks:{color:"#8b8da3"},grid:{display:false}}}});
+  mkChart("c4","bar",labels,[
+    {label:"负债",data:series.map(function(s){return s.bs.totalLiab||0}),backgroundColor:"#ff475766",borderRadius:4},
+    {label:"权益",data:series.map(function(s){return s.bs.equity||0}),backgroundColor:"#a55eea66",borderRadius:4}]);
+  var tb="<div class=\"section\"><div class=\"stitle\">📋 多月份汇总（当月期末值）</div><div class=\"body\" style=\"overflow-x:auto\"><table><thead><tr><th>指标</th>";
+  series.forEach(function(s){tb+="<th class=\"num\">"+s.period+"</th>"});
+  tb+="</tr></thead><tbody>";
+  var rows=[["营业收入(当月)",function(s){return s.pl.revenueM}],["营业成本(当月)",function(s){return s.pl.costM}],["毛利润(当月)",function(s){return(s.pl.revenueM||0)-(s.pl.costM||0)}],
+    ["销售费用(当月)",function(s){return s.pl.salesExpM}],["管理费用(当月)",function(s){return s.pl.adminExpM}],["财务费用(当月)",function(s){return s.pl.finExpM}],["净利润(当月)",function(s){return s.pl.netProfitM}],
+    ["货币资金",function(s){return s.bs.cash}],["总资产",function(s){return s.bs.totalAsset}],["负债合计",function(s){return s.bs.totalLiab}],
+    ["应收账款(含其他)",function(s){return s.bs.ar}],["应付账款(含其他)",function(s){return s.bs.ap}]];
+  rows.forEach(function(r){tb+="<tr><td>"+r[0]+"</td>";series.forEach(function(s){var v=r[1](s);tb+="<td class=\"num "+cls(v)+"\">"+fmt(v)+"</td>"});tb+="</tr>"});
+  tb+="</tbody></table></div></div>";
+  EL("tableArea").innerHTML=tb;
   renderRisks(L.pl,L.bs);
 }
 
-function renderCompare(){
-  const p=$('monthFilter').value;const fh=getData('fh',p),zdc=getData('zdc',p);
-  if(!fh&&!zdc){$('kpiGrid').innerHTML='';$('chartArea').innerHTML='<div class="empty-msg">该月份暂无数据</div>';$('tableArea').innerHTML='';$('riskArea').innerHTML='';return}
-  const items=[['营业收入',d=>d?.pl?.revenue],['营业成本',d=>d?.pl?.cost],['净利润',d=>d?.pl?.netProfit],
-    ['管理费用',d=>d?.pl?.adminExp],['货币资金',d=>d?.bs?.cash],['总资产',d=>d?.bs?.totalAsset],['负债合计',d=>d?.bs?.totalLiab],['所有者权益',d=>d?.bs?.equity]];
-  $('kpiGrid').innerHTML=items.map(([n,fn])=>{const fv=fn(fh),zv=fn(zdc);
-    return'<div class="kpi blue"><div class="label">'+n+'</div><div class="value" style="font-size:13px"><span style="color:var(--green)">芳华: '+fmt(fv)+'</span><br><span style="color:var(--blue)">仲大承: '+fmt(zv)+'</span>'+
-    (typeof fv==='number'&&typeof zv==='number'?'<br><span style="color:var(--purple);font-size:11px">合计: '+fmt(fv+zv)+'</span>':'')+'</div></div>'}).join('');
-  let ch='<div class="section"><div class="stitle">📊 '+p+' 芳华 vs 仲大承</div><div class="body"><div class="chart-box"><canvas id="cmpBar"></canvas></div></div></div>';
-  $('chartArea').innerHTML=ch;
-  const ms=['营业收入','营业成本','净利润','管理费用','货币资金'];
-  mkChart('cmpBar','bar',ms,[
-    {label:'芳华',data:[fh?.pl?.revenue||0,fh?.pl?.cost||0,fh?.pl?.netProfit||0,fh?.pl?.adminExp||0,fh?.bs?.cash||0],backgroundColor:'#00d4aa88',borderRadius:4},
-    {label:'仲大承',data:[zdc?.pl?.revenue||0,zdc?.pl?.cost||0,zdc?.pl?.netProfit||0,zdc?.pl?.adminExp||0,zdc?.bs?.cash||0],backgroundColor:'#4facfe88',borderRadius:4}]);
-  // Detail tables for both
-  let tb='';
-  ['fh','zdc'].forEach(c=>{
-    const d=c==='fh'?fh:zdc;if(!d?.detail)return;
-    const label=c==='fh'?'芳华':'仲大承';
-    const color=c==='fh'?'var(--green)':'var(--blue)';
-    tb+=buildDetailSection('📊 '+label+' - 收入明细',d.detail.revenue,color);
-    tb+=buildDetailSection('💸 '+label+' - 成本明细',d.detail.cost,color);
-    tb+=buildDetailSection('📋 '+label+' - 费用明细',[...d.detail.salesExp,...d.detail.adminExp,...d.detail.finExp],color);
-  });
-  $('tableArea').innerHTML=tb;
-  const merged=mergeData(p);renderRisks(merged?.pl,merged?.bs);
-}
-
 function renderSingle(){
-  const p=$('monthFilter').value,cf=$('companyFilter').value;
-  const d=cf==='merged'?mergeData(p):getData(cf,p);
-  if(!d){$('kpiGrid').innerHTML='';$('chartArea').innerHTML='<div class="empty-msg">暂无数据</div>';$('tableArea').innerHTML='';$('riskArea').innerHTML='';return}
-  const pl=d.pl||{},bs=d.bs||{};
+  var p=EL("monthFilter").value,cf=EL("companyFilter").value;
+  var d=cf==="merged"?mergeData(p):getData(cf,p);
+  if(!d){EL("kpiGrid").innerHTML="";EL("chartArea").innerHTML="<div class=\"empty-msg\">暂无数据</div>";EL("tableArea").innerHTML="";EL("riskArea").innerHTML="";return}
+  var pl=d.pl||{},bs=d.bs||{};
   renderKPI(pl,bs);
-  const gross=(pl.revenue||0)-(pl.cost||0);
-  let ch='<div class="row2"><div class="section"><div class="stitle">💰 利润瀑布</div><div class="body"><div class="chart-box"><canvas id="sP"></canvas></div></div></div>';
-  ch+='<div class="section"><div class="stitle">🏦 资产负债</div><div class="body"><div class="chart-box"><canvas id="sB"></canvas></div></div></div></div>';
-  $('chartArea').innerHTML=ch;
-  const pL=['营业收入','营业成本','毛利润','销售费用','管理费用','财务费用','净利润'];
-  const pV=[pl.revenue||0,-(pl.cost||0),gross,-(pl.salesExp||0),-(pl.adminExp||0),-(pl.finExp||0),pl.netProfit||0];
-  mkChart('sP','bar',pL,[{data:pV,backgroundColor:pV.map(v=>v>=0?'#00d4aa':'#ff4757'),borderRadius:4}],{plugins:{legend:{display:false}}});
-  mkChart('sB','bar',['流动资产','非流动资产','负债','权益'],[{data:[bs.currentAsset||0,bs.ncAsset||0,bs.totalLiab||0,bs.equity||0],
-    backgroundColor:['#00d4aa','#4facfe','#ff4757','#a55eea'],borderRadius:4}],{plugins:{legend:{display:false}}});
-  // ALL detail tables
-  let tb='';
-  if(cf==='merged'){
-    ['fh','zdc'].forEach(c=>{const dd=getData(c,p);if(!dd?.detail)return;const lb=c==='fh'?'芳华':'仲大承';const co=c==='fh'?'var(--green)':'var(--blue)';
-      tb+=buildDetailSection('📊 '+lb+' 收入明细',dd.detail.revenue,co);
-      tb+=buildDetailSection('💸 '+lb+' 成本明细',dd.detail.cost,co);
-      tb+=buildDetailSection('📋 '+lb+' 管理费用明细',dd.detail.adminExp,co);
-      tb+=buildDetailSection('📋 '+lb+' 销售费用明细',dd.detail.salesExp,co);
-      tb+=buildDetailSection('📋 '+lb+' 财务费用明细',dd.detail.finExp,co);
+  var grossM=(pl.revenueM||0)-(pl.costM||0);
+  var ch="<div class=\"row2\"><div class=\"section\"><div class=\"stitle\">💰 利润瀑布（当月值）</div><div class=\"body\"><div class=\"chart-box\"><canvas id=\"sP\"></canvas></div></div></div>";
+  ch+="<div class=\"section\"><div class=\"stitle\">🏦 资产负债（期末值）</div><div class=\"body\"><div class=\"chart-box\"><canvas id=\"sB\"></canvas></div></div></div></div>";
+  EL("chartArea").innerHTML=ch;
+  var pV=[pl.revenueM||0,-(pl.costM||0),grossM,-(pl.salesExpM||0),-(pl.adminExpM||0),-(pl.finExpM||0),pl.netProfitM||0];
+  mkChart("sP","bar",["营业收入","营业成本","毛利润","销售费用","管理费用","财务费用","净利润"],
+    [{data:pV,backgroundColor:pV.map(function(v){return v>=0?"#00d4aa":"#ff4757"}),borderRadius:4}],{plugins:{legend:{display:false}}});
+  mkChart("sB","bar",["流动资产","非流动资产","负债","权益"],
+    [{data:[bs.currentAsset||0,bs.ncAsset||0,bs.totalLiab||0,bs.equity||0],backgroundColor:["#00d4aa","#4facfe","#ff4757","#a55eea"],borderRadius:4}],{plugins:{legend:{display:false}}});
+  var tb="";
+  if(cf==="merged"){
+    ["fh","zdc"].forEach(function(c){
+      var dd=getData(c,p);if(!dd||!dd.detail)return;
+      var lb=c==="fh"?"芳华":"仲大承";var co=c==="fh"?"var(--green)":"var(--blue)";
+      tb+=buildDetailSection("📊 "+lb+" 收入明细",dd.detail.revenue,co);
+      tb+=buildDetailSection("💸 "+lb+" 成本明细",dd.detail.cost,co);
+      tb+=buildDetailSection("📋 "+lb+" 管理费用明细",dd.detail.adminExp,co);
+      tb+=buildDetailSection("📋 "+lb+" 销售费用明细",dd.detail.salesExp,co);
+      tb+=buildDetailSection("📋 "+lb+" 财务费用明细",dd.detail.finExp,co);
+      tb+=buildDetailSection("📥 "+lb+" 应收账款明细",dd.detail.arDetail,co);
+      tb+=buildDetailSection("📤 "+lb+" 应付账款明细",dd.detail.apDetail,co);
     });
   }else{
-    const dd=getData(cf,p);
-    if(dd?.detail){
-      tb+=buildDetailSection('📊 收入明细',dd.detail.revenue,'var(--green)');
-      tb+=buildDetailSection('💸 成本明细',dd.detail.cost,'var(--red)');
-      tb+=buildDetailSection('📋 管理费用明细',dd.detail.adminExp,'var(--yellow)');
-      tb+=buildDetailSection('📋 销售费用明细',dd.detail.salesExp,'var(--orange)');
-      tb+=buildDetailSection('📋 财务费用明细',dd.detail.finExp,'var(--blue)');
+    var dd=getData(cf,p);
+    if(dd&&dd.detail){
+      tb+=buildDetailSection("📊 收入明细",dd.detail.revenue,"var(--green)");
+      tb+=buildDetailSection("💸 成本明细",dd.detail.cost,"var(--red)");
+      tb+=buildDetailSection("📋 管理费用明细",dd.detail.adminExp,"var(--yellow)");
+      tb+=buildDetailSection("📋 销售费用明细",dd.detail.salesExp,"var(--orange)");
+      tb+=buildDetailSection("📋 财务费用明细",dd.detail.finExp,"var(--blue)");
+      tb+=buildDetailSection("📥 应收账款明细",dd.detail.arDetail,"var(--purple)");
+      tb+=buildDetailSection("📤 应付账款明细",dd.detail.apDetail,"var(--orange)");
     }
   }
-  $('tableArea').innerHTML=tb;
+  EL("tableArea").innerHTML=tb;
   renderRisks(pl,bs);
 }
 
 function buildDetailSection(title,items,barColor){
-  if(!items||!items.length)return'';
-  const total=items.reduce((s,i)=>s+i.amount,0);
-  const gid='g'+Math.random().toString(36).substr(2,6);
-  let h='<div class="section"><div class="stitle">'+title+' <span style="font-weight:400;font-size:12px;color:var(--text2)">合计: '+fmt(total)+'</span></div><div class="body">';
-  h+='<table><thead><tr><th style="width:50%">科目</th><th class="num" style="width:15%">本年累计</th><th class="num" style="width:15%">本月</th><th class="num" style="width:10%">占比</th><th style="width:10%"></th></tr></thead><tbody>';
-  items.forEach((item,idx)=>{
-    const pct=total?item.amount/total:0;
-    const hasKids=item.children&&item.children.length>0;
-    const rid=gid+'_'+idx;
-    h+='<tr class="tree-row'+(hasKids?' parent':'')+'"'+(hasKids?' onclick="toggleTree(\''+rid+'\')"':'')+'>';
-    h+='<td>'+(hasKids?'<span class="tree-toggle" id="tog_'+rid+'">▶</span>':'<span class="tree-toggle"></span>')+item.name+'</td>';
-    h+='<td class="num '+cls(item.amount)+'">'+fmt(item.amount)+'</td>';
-    h+='<td class="num">'+fmt(item.monthAmt)+'</td>';
-    h+='<td class="num">'+(pct*100).toFixed(1)+'%</td>';
-    h+='<td><div class="bar-bg"><div class="bar-fg" style="width:'+(pct*100).toFixed(0)+'%;background:'+barColor+'"></div></div></td></tr>';
-    if(hasKids){
-      item.children.forEach((kid,ki)=>{
-        const hasGrand=kid.children&&kid.children.length>0;
-        const krid=rid+'_'+ki;
-        h+='<tr class="tree-row tree-child '+rid+''+(hasGrand?' parent':'')+'"'+(hasGrand?' onclick="event.stopPropagation();toggleTree(\''+krid+'\')"':'')+'>';
-        h+='<td class="indent-1">'+(hasGrand?'<span class="tree-toggle" id="tog_'+krid+'">▶</span>':'<span class="tree-toggle">·</span>')+kid.name+'</td>';
-        h+='<td class="num '+cls(kid.amount)+'">'+fmt(kid.amount)+'</td>';
-        h+='<td class="num">'+fmt(kid.monthAmt)+'</td>';
-        const kpct=item.amount?kid.amount/item.amount:0;
-        h+='<td class="num" style="color:var(--text2)">'+(kpct*100).toFixed(1)+'%</td>';
-        h+='<td></td></tr>';
-        if(hasGrand){
-          kid.children.forEach(g=>{
-            h+='<tr class="tree-row tree-child '+krid+'">';
-            h+='<td class="indent-2"><span class="tree-toggle">·</span>'+g.name+'</td>';
-            h+='<td class="num '+cls(g.amount)+'">'+fmt(g.amount)+'</td>';
-            h+='<td class="num">'+fmt(g.monthAmt)+'</td>';
-            h+='<td class="num" style="color:var(--text2)"></td><td></td></tr>';
-          });
-        }
-      });
-    }
-  });
-  h+='</tbody></table></div></div>';
+  if(!items||!items.length)return"";
+  var total=0;items.forEach(function(i){total+=i.amount});
+  var gid="g"+Math.random().toString(36).substr(2,6);
+  var h="<div class=\"section\"><div class=\"stitle\">"+title+" <span style=\"font-weight:400;font-size:12px;color:var(--text2)\">合计: "+fmt(total)+"</span></div><div class=\"body\">";
+  h+="<table><thead><tr><th style=\"width:50%\">科目</th><th class=\"num\" style=\"width:15%\">本年累计</th><th class=\"num\" style=\"width:15%\">本月</th><th class=\"num\" style=\"width:10%\">占比</th><th style=\"width:10%\"></th></tr></thead><tbody>";
+  function renderItems(itemList,depth,parentRid,parentTotal){
+    itemList.forEach(function(item,idx){
+      var pct=parentTotal?item.amount/parentTotal:0;
+      var hasKids=item.children&&item.children.length>0;
+      var rid=gid+"_"+depth+"_"+idx+"_"+Math.random().toString(36).substr(2,4);
+      var indentClass=depth===0?"":(depth===1?"indent-1":(depth===2?"indent-2":(depth===3?"indent-3":"indent-4")));
+      var isChild=depth>0;
+      var childClass=isChild?"tree-child "+parentRid:"";
+      var openClass=isChild?"open":"";
+      h+="<tr class=\"tree-row"+(hasKids?" parent":"")+" "+childClass+" "+openClass+"\"";
+      if(hasKids)h+=" onclick=\"toggleTree(\x27"+rid+"\x27)\"";
+      h+=">";
+      h+="<td class=\""+indentClass+"\">"+(hasKids?"<span class=\"tree-toggle\" id=\"tog_"+rid+"\">▼</span>":"<span class=\"tree-toggle\">·</span>")+item.name+"</td>";
+      h+="<td class=\"num "+cls(item.amount)+"\">"+fmt(item.amount)+"</td>";
+      h+="<td class=\"num\">"+fmt(item.monthAmt)+"</td>";
+      h+="<td class=\"num\">"+(pct*100).toFixed(1)+"%</td>";
+      if(depth===0){h+="<td><div class=\"bar-bg\"><div class=\"bar-fg\" style=\"width:"+(pct*100).toFixed(0)+"%;background:"+barColor+"\"></div></div></td>"}else{h+="<td></td>"}
+      h+="</tr>";
+      if(hasKids)renderItems(item.children,depth+1,rid,item.amount);
+    });
+  }
+  renderItems(items,0,"",total);
+  var totalMonth=0;items.forEach(function(i){totalMonth+=i.monthAmt||0});
+  h+="<tr style=\"border-top:2px solid var(--border);font-weight:600\"><td>合计</td><td class=\"num "+cls(total)+"\">"+ fmt(total)+"</td><td class=\"num "+cls(totalMonth)+"\">"+fmt(totalMonth)+"</td><td class=\"num\">100%</td><td></td></tr>";
+  h+="</tbody></table></div></div>";
   return h;
 }
 
 window.toggleTree=function(rid){
-  const rows=document.querySelectorAll('.'+rid);
-  const tog=document.getElementById('tog_'+rid);
-  const isOpen=rows[0]?.classList.contains('open');
-  rows.forEach(r=>{if(isOpen){r.classList.remove('open')}else{r.classList.add('open')}});
-  if(tog)tog.textContent=isOpen?'▶':'▼';
+  var rows=document.querySelectorAll("."+CSS.escape(rid));
+  var tog=document.getElementById("tog_"+rid);
+  if(!rows.length)return;
+  var isOpen=rows[0].classList.contains("open");
+  for(var i=0;i<rows.length;i++){
+    if(isOpen){
+      rows[i].classList.remove("open");
+      var subTog=rows[i].querySelector(".tree-toggle[id^=\"tog_\"]");
+      if(subTog){
+        var subRid=subTog.id.replace("tog_","");
+        var subRows=document.querySelectorAll("."+CSS.escape(subRid));
+        for(var j=0;j<subRows.length;j++)subRows[j].classList.remove("open");
+        subTog.textContent="▶";
+      }
+    }else{rows[i].classList.add("open")}
+  }
+  if(tog)tog.textContent=isOpen?"▶":"▼";
 };
 
 function renderKPI(pl,bs,prevPL,prevBS){
   pl=pl||{};bs=bs||{};
-  const gm=pl.revenue?(pl.revenue-pl.cost)/pl.revenue:null;
-  const nm=pl.revenue?pl.netProfit/pl.revenue:null;
-  const dr=bs.totalAsset?bs.totalLiab/bs.totalAsset:null;
-  const tb=(c,p)=>{if(c==null||p==null)return'';const d=c-p;if(Math.abs(d)<1)return'';
-    return'<span class="trend '+(d>0?'up':'down')+'">'+(d>0?'↑':'↓')+fmt(Math.abs(d))+'</span>'};
-  const kpis=[
-    {l:'营业收入(累计)',v:fmt(pl.revenue),s:'当月: '+fmt(pl.revenueM)+(prevPL?' '+tb(pl.revenue,prevPL.revenue):''),c:'green'},
-    {l:'净利润(累计)',v:fmt(pl.netProfit),s:'当月: '+fmt(pl.netProfitM)+(prevPL?' '+tb(pl.netProfit,prevPL.netProfit):''),c:pl.netProfit>=0?'green':'red'},
-    {l:'毛利率',v:fmtP(gm),s:'成本率: '+fmtP(pl.revenue?pl.cost/pl.revenue:null),c:gm>0?'green':'red'},
-    {l:'净利率',v:fmtP(nm),c:nm>0?'green':'red'},
-    {l:'货币资金',v:fmt(bs.cash),s:'年初: '+fmt(bs.cashPrev)+(prevBS?' '+tb(bs.cash,prevBS.cash):''),c:'blue'},
-    {l:'总资产',v:fmt(bs.totalAsset),c:'blue'},
-    {l:'资产负债率',v:fmtP(dr),s:'负债: '+fmt(bs.totalLiab),c:dr>1?'red':'yellow'},
-    {l:'所有者权益',v:fmt(bs.equity),c:bs.equity>=0?'green':'red'}];
-  $('kpiGrid').innerHTML=kpis.map(k=>'<div class="kpi '+k.c+'"><div class="label">'+k.l+'</div><div class="value">'+k.v+'</div><div class="sub">'+(k.s||'')+'</div></div>').join('');
+  var gmM=pl.revenueM?(pl.revenueM-(pl.costM||0))/pl.revenueM:null;
+  var nmM=pl.revenueM?(pl.netProfitM||0)/pl.revenueM:null;
+  function tb(c,p){if(c==null||p==null)return"";var d=c-p;if(Math.abs(d)<1)return"";
+    return"<span class=\"trend "+(d>0?"up":"down")+"\">"+(d>0?"↑":"↓")+fmt(Math.abs(d))+"</span>"}
+  var kpis=[
+    {l:"营业收入(当月)",v:fmt(pl.revenueM),s:"累计: "+fmt(pl.revenue)+(prevPL?" "+tb(pl.revenueM,prevPL.revenueM):""),c:"green"},
+    {l:"净利润(当月)",v:fmt(pl.netProfitM),s:"累计: "+fmt(pl.netProfit)+(prevPL?" "+tb(pl.netProfitM,prevPL.netProfitM):""),c:(pl.netProfitM||0)>=0?"green":"red"},
+    {l:"毛利率(当月)",v:fmtP(gmM),s:"成本率: "+fmtP(pl.revenueM?(pl.costM||0)/pl.revenueM:null),c:gmM>0?"green":"red"},
+    {l:"净利率(当月)",v:fmtP(nmM),c:nmM>0?"green":"red"},
+    {l:"货币资金",v:fmt(bs.cash),s:"年初: "+fmt(bs.cashPrev)+(prevBS?" "+tb(bs.cash,prevBS.cash):""),c:"blue"},
+    {l:"总资产",v:fmt(bs.totalAsset),c:"blue"},
+    {l:"应收账款(含其他)",v:fmt(bs.ar),s:"年初: "+fmt(bs.arPrev)+(prevBS?" "+tb(bs.ar,prevBS.ar):""),c:"purple"},
+    {l:"应付账款(含其他)",v:fmt(bs.ap),s:"年初: "+fmt(bs.apPrev)+(prevBS?" "+tb(bs.ap,prevBS.ap):""),c:"orange"}
+  ];
+  var html="";
+  kpis.forEach(function(k){html+="<div class=\"kpi "+k.c+"\"><div class=\"label\">"+k.l+"</div><div class=\"value\">"+k.v+"</div><div class=\"sub\">"+(k.s||"")+"</div></div>"});
+  EL("kpiGrid").innerHTML=html;
 }
 
 function renderRisks(pl,bs){
-  pl=pl||{};bs=bs||{};const risks=[];
-  if(bs.equity<0)risks.push({l:'p0',t:'所有者权益 '+fmt(bs.equity)+'，资不抵债。'});
-  if(pl.cost>pl.revenue&&pl.revenue>0)risks.push({l:'p0',t:'营业成本('+fmt(pl.cost)+') > 营业收入('+fmt(pl.revenue)+')，毛利为负。'});
-  if(pl.netProfit<0)risks.push({l:'p1',t:'净利润 '+fmt(pl.netProfit)+'，处于亏损状态。'});
-  if(bs.totalAsset&&bs.totalLiab/bs.totalAsset>2)risks.push({l:'p1',t:'资产负债率 '+fmtP(bs.totalLiab/bs.totalAsset)+'，严重超标。'});
-  if(bs.otherAR&&bs.totalAsset&&bs.otherAR/bs.totalAsset>0.5)risks.push({l:'p1',t:'其他应收款占总资产 '+(bs.otherAR/bs.totalAsset*100).toFixed(0)+'%，关联方资金占用风险。'});
-  if(!risks.length)risks.push({l:'p2',t:'未发现重大异常。'});
-  $('riskArea').innerHTML='<div class="section"><div class="stitle">⚠️ 风险提示</div><div class="body">'+
-    risks.map(r=>'<div class="risk '+r.l+'"><span class="tag '+r.l+'">'+r.l.toUpperCase()+'</span>'+r.t+'</div>').join('')+'</div></div>';
+  pl=pl||{};bs=bs||{};var risks=[];
+  if(bs.equity<0)risks.push({l:"p0",t:"所有者权益 "+fmt(bs.equity)+"，资不抵债。"});
+  if((pl.costM||0)>(pl.revenueM||0)&&(pl.revenueM||0)>0)risks.push({l:"p0",t:"当月营业成本("+fmt(pl.costM)+") > 营业收入("+fmt(pl.revenueM)+")，毛利为负。"});
+  if((pl.netProfitM||0)<0)risks.push({l:"p1",t:"当月净利润 "+fmt(pl.netProfitM)+"，处于亏损状态。"});
+  if(bs.totalAsset&&bs.totalLiab/bs.totalAsset>2)risks.push({l:"p1",t:"资产负债率 "+fmtP(bs.totalLiab/bs.totalAsset)+"，严重超标。"});
+  if(bs.otherAR&&bs.totalAsset&&bs.otherAR/bs.totalAsset>0.5)risks.push({l:"p1",t:"其他应收款占总资产 "+(bs.otherAR/bs.totalAsset*100).toFixed(0)+"%，关联方资金占用风险。"});
+  if(!risks.length)risks.push({l:"p2",t:"未发现重大异常。"});
+  var html="<div class=\"section\"><div class=\"stitle\">⚠️ 风险提示</div><div class=\"body\">";
+  risks.forEach(function(r){html+="<div class=\"risk "+r.l+"\"><span class=\"tag "+r.l+"\">"+r.l.toUpperCase()+"</span>"+r.t+"</div>"});
+  html+="</div></div>";
+  EL("riskArea").innerHTML=html;
 }
 
 refreshUI();
